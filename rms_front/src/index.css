@@ -5,11 +5,17 @@
 @theme {
   --font-main: "Unbounded", sans-serif;
 
-  --color-primary: rgb(0, 0, 0);
-  --color-secondary: rgb(0, 0, 0);
+  --color-container-primary: rgb(0, 0, 0);
+  --color-container-secondary: rgb(0, 0, 0);
+  --color-container-primary-inv: rgb(0, 0, 0);
+  --color-container-secondary-inv: rgb(0, 0, 0);
+
   --color-accent: rgb(0, 0, 0);
-  --color-text-primary: rgb(0, 0, 0);
-  --color-text-secondary: rgb(0, 0, 0);
+
+  --color-textBase: rgb(0, 0, 0);
+  --color-textSecondary: oklch(0.681, 0.182, 291);
+  --color-textBase-inv: rgb(0, 0, 0);
+  --color-textSecondary-inv: rgb(0, 0, 0);
 }
 
 
