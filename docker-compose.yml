@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16.2-alpine # Uses a lightweight PostgreSQL image
+    restart: always # Ensures the container restarts if it fails
+    shm_size: 128mb # Recommended for performance
+    ports:
+      - "5432:5432" # Maps the container port 5432 to the host port 5432
+    environment:
+      POSTGRES_USER: myuser # Sets the default user
+      POSTGRES_PASSWORD: mypassword # Sets the password for the user
+      POSTGRES_DB: mydatabase # Sets a custom default database name
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persists database data on the host
+
+  adminer:
+    image: adminer # Optional: A lightweight web-based DB management tool
+    restart: always
+    ports:
+      - "8080:8080" # Access via http://localhost:8080
+
+volumes:
+  pgdata: # Defines the volume for data persistence
