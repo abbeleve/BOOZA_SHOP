@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String, Time, DateTime, CheckConstraint, Enum, ForeignKey, Boolean
+from sqlalchemy import MetaData, Column, Integer, String, Time, DateTime, CheckConstraint, Enum, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -18,76 +18,73 @@ class Role(enum.Enum):
 class Order(Base):
     __tablename__ = 'orders'
 
-    OrderID = Column(Integer, primary_key=True)
-    CreateDateTime = Column(DateTime, default=datetime.utcnow)
-    EndDateTime = Column(DateTime, nullable=True)
-    Status = Column(Enum(Status))
-    DeliveryAddress = Column(String, nullable=False)
-    TotalAmount = Column(Integer, nullable=False)
-    Description = Column(String, nullable=True)
-    OrderFoodID = Column(Integer, ForeignKey('orderItems.orderFoodID'), nullable=False)
-    UserID = Column(Integer, ForeignKey('users.UserID'), nullable=False)
+    order_id = Column(Integer, primary_key=True)
+    create_datetime = Column(DateTime, default=datetime.utcnow)
+    end_datetime = Column(DateTime, nullable=True)
+    status = Column(Enum(Status))
+    delivery_address = Column(String, nullable=False)
+    total_amount = Column(Integer, nullable=False)
+    description = Column(String, nullable=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
 
     user = relationship('Users', back_populates='orders')
-    items = relationship('OrderItems', back_populates='orders')
+    items = relationship('OrderItems', back_populates='order')
 
 class OrderItems(Base):
-    __tablename__ = 'orderItems'
+    __tablename__ = 'order_items'
 
-    OrderFoodID = Column(Integer, primary_key=True)
-    MenuItemID = Column(Integer, ForeignKey('menuItems.menuItemID'), nullable=False)
-    OrderID = Column(Integer, ForeignKey('orders.OrderID'), nullable=False)
-    Quantity = Column(Integer)
-    Price = Column(Integer)
+    order_food_id = Column(Integer, primary_key=True)
+    menu_item_id = Column(Integer, ForeignKey('menu_items.menu_id'), nullable=False)
+    order_id = Column(Integer, ForeignKey('orders.order_id'), nullable=False)
+    quantity = Column(Integer)
+    price = Column(Integer)
 
     order = relationship('Order', back_populates='items')
-    menu_item = relationship('MenuItem', back_populates='order_items')
+    menu_item = relationship('MenuItems', back_populates='order_items')
 
 class MenuItems(Base):
-    __tablename__ = 'menuItems'
+    __tablename__ = 'menu_items'
     
-    MenuID = Column(Integer, primary_key=True)
-    FoodName = Column(String)
-    Description = Column(String)
-    ImageURL = Column(String)
-    IsAvailable = Column(Boolean)
-    Price = Column('Price', Integer, CheckConstraint('Price > 0'), nullable=False)
-    PreparationTime = Column(Time, nullable=False)
-    CategoryID = Column(Integer, ForeignKey('foodType.CategoryID'))
+    menu_id = Column(Integer, primary_key=True)
+    food_name = Column(String)
+    description = Column(String)
+    image_url = Column(String)
+    is_available = Column(Boolean)
+    price = Column(Integer, CheckConstraint('price > 0'), nullable=False)
+    preparation_time = Column(Time, nullable=False)
+    category_id = Column(Integer, ForeignKey('food_type.category_id'))
 
     order_items = relationship("OrderItems", back_populates="menu_item")
     category = relationship("FoodType", back_populates="menu_items")
 
 class FoodType(Base):
-    __tablename__ = 'foodType'
+    __tablename__ = 'food_type'
 
-    CategoryID = Column(Integer, primary_key=True)
-    Name = Column(String, nullable=False)
+    category_id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
 
     menu_items = relationship("MenuItems", back_populates="category")
 
 class Users(Base):
     __tablename__ = 'users'
 
-    UserID = Column(Integer, primary_key=True)
-    Username = Column(String, CheckConstraint('len(Username) < 30 AND len(Username) >= 2'))
-    Name = Column(String, CheckConstraint('len(Name) < 30 AND len(Name) >= 2'))
-    Surname = Column(String, CheckConstraint('len(Surname) < 30 AND len(Surname) >= 2'))
-    Patronymic = Column(String, CheckConstraint("len(Patronymic) < 30 AND len(Patronymic) >= 2"), nullable = True)
-    HashPassword = Column(String, nullable=False)
-    Address = Column(String)
-    Phone = Column(String, nullable=False)
-    Email = Column(String, nullable=False)
+    user_id = Column(Integer, primary_key=True)
+    username = Column(String(29), CheckConstraint('LENGTH(username) >= 2'), unique=True, nullable=False)
+    name = Column(String(29), CheckConstraint('LENGTH(name) >= 2'), nullable=False)
+    surname = Column(String(29), CheckConstraint('LENGTH(surname) >= 2'), nullable=False)
+    patronymic = Column(String(29), CheckConstraint('LENGTH(patronymic) >= 2'), nullable=True)
+    hash_password = Column(String, nullable=False)
+    address = Column(String)
+    phone = Column(String, nullable=False)
+    email = Column(String, nullable=False)
 
     orders = relationship("Order", back_populates="user")
     staff = relationship("Staff", back_populates="user", uselist=False)
 
-
 class Staff(Base):
     __tablename__ = 'staff'
 
-    Username = Column(String, primary_key=True)
-    HashPassword = Column(String, nullable=False)
-    Role = Column(Enum(Role))
+    username = Column(String, ForeignKey('users.username'), primary_key=True)
+    role = Column(Enum(Role))
 
     user = relationship("Users", back_populates="staff")

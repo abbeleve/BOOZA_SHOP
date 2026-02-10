@@ -17,6 +17,24 @@ services:
     restart: always
     ports:
       - "8080:8080" # Access via http://localhost:8080
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    depends_on:
+      - db
+    command: alembic upgrade head
+    restart: "on-failure"
 
 volumes:
   pgdata: # Defines the volume for data persistence
