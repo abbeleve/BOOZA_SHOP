@@ -26,10 +26,11 @@ class Order(Base):
     TotalAmount = Column(Integer, nullable=False)
     Description = Column(String, nullable=True)
     OrderFoodID = Column(Integer, ForeignKey('orderItems.orderFoodID'), nullable=False)
-    UserID = Column(Integer, ForeignKey('users.UserID'), nullablke=False)
+    UserID = Column(Integer, ForeignKey('users.UserID'), nullable=False)
 
     user = relationship('Users', back_populates='orders')
-    item
+    items = relationship('OrderItems', back_populates='orders')
+
 class OrderItems(Base):
     __tablename__ = 'orderItems'
 
@@ -38,6 +39,9 @@ class OrderItems(Base):
     OrderID = Column(Integer, ForeignKey('orders.OrderID'), nullable=False)
     Quantity = Column(Integer)
     Price = Column(Integer)
+
+    order = relationship('Order', back_populates='items')
+    menu_item = relationship('MenuItem', back_populates='order_items')
 
 class MenuItems(Base):
     __tablename__ = 'menuItems'
@@ -51,11 +55,16 @@ class MenuItems(Base):
     PreparationTime = Column(Time, nullable=False)
     CategoryID = Column(Integer, ForeignKey('foodType.CategoryID'))
 
+    order_items = relationship("OrderItems", back_populates="menu_item")
+    category = relationship("FoodType", back_populates="menu_items")
+
 class FoodType(Base):
     __tablename__ = 'foodType'
 
     CategoryID = Column(Integer, primary_key=True)
     Name = Column(String, nullable=False)
+
+    menu_items = relationship("MenuItems", back_populates="category")
 
 class Users(Base):
     __tablename__ = 'users'
@@ -70,9 +79,15 @@ class Users(Base):
     Phone = Column(String, nullable=False)
     Email = Column(String, nullable=False)
 
+    orders = relationship("Order", back_populates="user")
+    staff = relationship("Staff", back_populates="user", uselist=False)
+
+
 class Staff(Base):
     __tablename__ = 'staff'
 
     Username = Column(String, primary_key=True)
     HashPassword = Column(String, nullable=False)
     Role = Column(Enum(Role))
+
+    user = relationship("Users", back_populates="staff")

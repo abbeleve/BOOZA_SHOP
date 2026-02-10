@@ -6,9 +6,9 @@ services:
     ports:
       - "5432:5432" # Maps the container port 5432 to the host port 5432
     environment:
-      POSTGRES_USER: myuser # Sets the default user
-      POSTGRES_PASSWORD: mypassword # Sets the password for the user
-      POSTGRES_DB: mydatabase # Sets a custom default database name
+      POSTGRES_USER: ${POSTGRES_USER} # Sets the default user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Sets the password for the user
+      POSTGRES_DB: ${POSTGRES_DB} # Sets a custom default database name
     volumes:
       - pgdata:/var/lib/postgresql/data # Persists database data on the host
 
