@@ -1,4 +1,6 @@
 import ProductCard from "@/components /base/products/ProductCard";
+import { BeatLoader } from "react-spinners";
+
 
 interface MenuProps {
     categories: string[];
@@ -6,12 +8,23 @@ interface MenuProps {
         id: string;
         imageUrl: string;
         title: string;
+        category: string;
         description: string;
         price: string;
     }>;
+    loading: boolean;
 }
 
-function Menu({categories, products = []}: MenuProps) {
+function Menu({categories, products = [], loading}: MenuProps) {
+
+    if (loading) {
+        return (
+            <section className="flex justify-center mx-auto px-4 py-6">
+                <BeatLoader />
+            </section>
+        );
+    }
+
     return (
         <section className="container mx-auto px-4 py-6">
             {/* Категории */}

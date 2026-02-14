@@ -19,7 +19,7 @@ function MainPage() {
     return (
         <div className="flex flex-col">
             <Header items={headerItems} phoneNumber={phoneNumber}/>
-            <Menu categories={["Буузы", "Напитки", "Супы", "Салаты", "Десерты"]} />
+            <Menu categories={["Буузы", "Напитки", "Супы", "Салаты", "Десерты"]} loading={false} />
             <Footer mainLinks={headerItems} additionalLinks={[]} mail={mail} phoneNumber={phoneNumber} />
         </div>
     )
