@@ -77,6 +77,7 @@ class Users(Base):
     address = Column(String)
     phone = Column(String, nullable=False)
     email = Column(String, nullable=False)
+    create_datetime = Column(DateTime, nullable=False)
 
     orders = relationship("Order", back_populates="user")
     staff = relationship("Staff", back_populates="user", uselist=False)
