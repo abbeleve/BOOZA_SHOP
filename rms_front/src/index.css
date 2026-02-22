@@ -5,21 +5,42 @@
 @theme {
   --font-main: "Unbounded", sans-serif;
 
-  --color-container-primary: rgb(0, 0, 0);
-  --color-container-secondary: rgb(0, 0, 0);
-  --color-container-primary-inv: rgb(0, 0, 0);
-  --color-container-secondary-inv: rgb(0, 0, 0);
+  /* --- PALETTE (Light Mode Base) --- */
+  /* Используем oklch для лучшей совместимости и гаммы */
+  
+  /* 1. Brand & Accent (Аппетитный оранжевый/терракотовый) */
+  --color-accent: oklch(65% 0.2 30);        /* Основной бренд */
+  --color-accent-hover: oklch(55% 0.2 30);  /* Нажатие/Ховер */
+  --color-accent-light: oklch(95% 0.05 30); /* Фоновый акцент (бейджи) */
 
-  --color-accent: rgb(0, 0, 0);
+  /* 2. Surfaces (Контейнеры) */
+  --color-surface-base: oklch(98% 0 0);    /* Фон страницы (почти белый) */
+  --color-surface-card: oklch(100% 0 0);   /* Карточки, инпуты (чистый белый) */
+  --color-surface-border: oklch(96% 0 0);  /* Границы */
 
-  --color-textBase: rgb(0, 0, 0);
-  --color-textSecondary: oklch(0.681, 0.182, 291);
-  --color-textBase-inv: rgb(0, 0, 0);
-  --color-textSecondary-inv: rgb(0, 0, 0);
+  /* 3. Text Content */
+  --color-text-primary: oklch(20% 0 0);    /* Основной текст (не черный, а темно-серый) */
+  --color-text-secondary: oklch(50% 0 0);  /* Вторичный текст (описания) */
+  --color-text-inverse: oklch(100% 0 0);   /* Текст на акцентном фоне */
+
+  /* 4. Semantic States (Для статусов заказов) */
+  --color-success: oklch(70% 0.15 140);    /* Готов / Оплачен */
+  --color-warning: oklch(80% 0.15 80);     /* Готовится / В ожидании */
+  --color-error: oklch(60% 0.2 20);        /* Отменен / Ошибка */
+
+  /* --- MAPPING TO TAILWIND UTILITIES --- */
+  /* Это позволяет писать bg-surface-base, text-text-primary и т.д. */
+  --color-background: var(--color-surface-base);
+  --color-foreground: var(--color-text-primary);
 }
 
 
 @layer base {
+    body {
+        @apply bg-background text-foreground;
+        @apply antialiased;
+    }
+
     h1 {
         @apply text-3xl;
         @apply font-main;
@@ -40,7 +61,7 @@
         @apply font-main;
     }
 
-    p, span, a, input, label {
+    p, span, a, input, label, button {
         @apply font-normal;
         @apply font-main;
     }
