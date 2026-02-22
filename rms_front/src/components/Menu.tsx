@@ -1,6 +1,6 @@
 import ProductCard from "@/components/base/products/ProductCard";
 import { BeatLoader } from "react-spinners";
-import { useCart } from "@/hooks/useCart";
+import { useCart } from "@/contexts/CartContext";
 
 interface MenuProps {
     categories: string[];
@@ -66,7 +66,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                     <>
                         <ProductCard
                             id={1}
-                            imageUrl="/public/test_food_images/booza.png"
+                            imageUrl="/test_food_images/booza.png"
                             title="Буузы 20 шт."
                             description="Рыба текст Рыба текст Рыба текст Рыба текст Рыба текст"
                             price="1000 ₽"
@@ -76,7 +76,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                         />
                         <ProductCard
                             id={2}
-                            imageUrl="/public/test_food_images/booza.png"
+                            imageUrl="/test_food_images/booza.png"
                             title="Очень острая американская пицца"
                             description="Пикантная пицца с острыми специями и сыром"
                             price="1200 ₽"
@@ -86,7 +86,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                         />
                         <ProductCard
                             id={3}
-                            imageUrl="/public/test_food_images/booza.png"
+                            imageUrl="/test_food_images/booza.png"
                             title="Салат Цезарь"
                             description="Классический салат с курицей и пармезаном"
                             price="500 ₽"
@@ -96,7 +96,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                         />
                         <ProductCard
                             id={4}
-                            imageUrl="/public/test_food_images/booza.png"
+                            imageUrl="/test_food_images/booza.png"
                             title="Паста Карбонара"
                             description="Итальянская паста с беконом и сыром"
                             price="800 ₽"
@@ -106,7 +106,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                         />
                         <ProductCard
                             id={5}
-                            imageUrl="/public/test_food_images/booza.png"
+                            imageUrl="/test_food_images/booza.png"
                             title="Суп Рамен"
                             description="Японский суп с лапшой и мясом"
                             price="600 ₽"
@@ -116,7 +116,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                         />
                         <ProductCard
                             id={6}
-                            imageUrl="/public/test_food_images/booza.png"
+                            imageUrl="/test_food_images/booza.png"
                             title="Десерт Тирамису"
                             description="Классический итальянский десерт"
                             price="400 ₽"

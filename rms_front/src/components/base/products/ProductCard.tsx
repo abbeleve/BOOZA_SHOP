@@ -46,7 +46,7 @@ function ProductCard({
                         alt={title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/pulic/test_food_images/booza.png';
+                            (e.target as HTMLImageElement).src = '/test_food_images/booza.png';
                         }}
                     />
                 )}
