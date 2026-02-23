@@ -11,17 +11,39 @@ services:
       POSTGRES_DB: ${POSTGRES_DB} # Sets a custom default database name
     volumes:
       - pgdata:/var/lib/postgresql/data # Persists database data on the host
-
-  adminer:
-    image: adminer # Optional: A lightweight web-based DB management tool
-    restart: always
-    ports:
-      - "8080:8080" # Access via http://localhost:8080
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
+  adminer:
+    image: adminer # Optional: A lightweight web-based DB management tool
+    restart: always
+    ports:
+      - "8080:8080" # Access via http://localhost:8080
+    depends_on:
+    - db
+  
+  backend:
+    build:
+      context: backend/
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+    depends_on:
+      - db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
 volumes:
-  pgdata: # Defines the volume for data persistence
+  pgdata:

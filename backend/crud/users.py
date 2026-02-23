@@ -133,6 +133,9 @@ def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
 # ДОПОЛНИТЕЛЬНЫЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 # ======================
 
+def get_user_by_username(db: Session, username: str) -> Users | None:
+    return db.query(Users).filter(Users.username == username).first()
+
 def get_user_by_phone(db: Session, phone: str) -> Users | None:
     """Получает пользователя по НОРМАЛИЗОВАННОМУ телефону"""
     normalized = _normalize_phone(phone)
