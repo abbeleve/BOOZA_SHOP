@@ -1,0 +1,2139 @@
+Project Path: BOOZA_SHOP_2
+
+Source Tree:
+
+```txt
+BOOZA_SHOP_2
+├── README_dev.md
+├── alembic
+│   ├── README
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions
+│       ├── 00bf0b58d49d_added_create_datetime_in_database.py
+│       ├── 5087af87cc44_initial_models.py
+│       └── fdbd618928db_initial_schema.py
+├── alembic.ini
+├── backend
+│   ├── Dockerfile
+│   ├── __init__.py
+│   ├── api
+│   │   └── endpoints
+│   │       ├── auth.py
+│   │       └── staff.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   └── security.py
+│   ├── crud
+│   │   ├── food_type.py
+│   │   ├── menu.py
+│   │   ├── order_items.py
+│   │   ├── orders.py
+│   │   ├── staff.py
+│   │   └── users.py
+│   ├── main.py
+│   ├── models
+│   │   ├── database.py
+│   │   ├── init_db.py
+│   │   └── setting_up_db.py
+│   ├── requirements.txt
+│   ├── schemas
+│   │   ├── auth.py
+│   │   └── staff.py
+│   ├── test
+│   │   ├── test_food_type.py
+│   │   ├── test_menu.py
+│   │   ├── test_staff.py
+│   │   └── test_user.py
+│   └── utils
+│       └── security.py
+├── docker-compose.yml
+├── main.py
+└── pyproject.toml
+
+```
+
+`README_dev.md`:
+
+```md
+# 1. Запустите БД (если ещё не запущена)
+docker compose up -d db
+
+# 2. Создайте ПЕРВУЮ миграцию (автоматически прочитает setting_up_db.py)
+alembic revision --autogenerate -m "initial schema"
+
+# 3. Проверьте, что файл создался
+ls alembic/versions/
+# Должен быть файл вида: abc123_initial_schema.py
+
+# 4. Откройте его и убедитесь, что в upgrade() есть операции создания таблиц
+# Например: op.create_table('users', ...), op.create_table('orders', ...)
+
+# 5. Примените миграцию → ЭТО СОЗДАСТ ВСЕ ТАБЛИЦЫ В БД
+alembic upgrade head
+
+# 6. Проверьте результат
+alembic current  # Должен показать хеш миграции, не "None"
+2. После изменений в моделях
+
+# Создать новую миграцию
+alembic revision --autogenerate -m "add email field"
+
+# Проверить файл в alembic/versions/ (ОБЯЗАТЕЛЬНО!)
+# Применить изменения
+alembic upgrade head
+```
+
+`alembic.ini`:
+
+```ini
+[alembic]
+script_location = alembic
+prepend_sys_path = .
+
+# Оставляем пустым — URL будет формироваться в env.py
+sqlalchemy.url = 
+
+[post_write_hooks]
+
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+```
+
+`alembic/README`:
+
+```
+Generic single-database configuration.
+```
+
+`alembic/env.py`:
+
+```py
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
+from alembic import context
+
+from pathlib import Path
+import sys
+import os
+
+sys.path.insert(0, str(Path(__file__).parents[1]))
+
+from dotenv import load_dotenv
+
+load_dotenv()
+from backend.models.setting_up_db import Base
+
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
+config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+target_metadata = Base.metadata
+# target_metadata = None
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
+
+def get_database_url() -> str:
+    """Формирует безопасный URL для подключения к БД"""
+    user = os.getenv("POSTGRES_USER", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD", "postgres")
+    host = os.getenv("POSTGRES_HOST", "localhost")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    db = os.getenv("POSTGRES_DB", "restaurant")
+    
+    # Для продакшена используйте:
+    # - в докере: host = "db" (имя сервиса в docker-compose)
+    # - на хосте: host = "localhost"
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
+    url = get_database_url()
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+        url=get_database_url(),
+    )
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+```
+
+`alembic/script.py.mako`:
+
+```mako
+"""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
+
+# revision identifiers, used by Alembic.
+revision: str = ${repr(up_revision)}
+down_revision: Union[str, Sequence[str], None] = ${repr(down_revision)}
+branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    ${downgrades if downgrades else "pass"}
+
+```
+
+`alembic/versions/00bf0b58d49d_added_create_datetime_in_database.py`:
+
+```py
+"""added create datetime in database
+
+Revision ID: 00bf0b58d49d
+Revises: fdbd618928db
+Create Date: 2026-02-16 19:51:45.862177
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '00bf0b58d49d'
+down_revision: Union[str, Sequence[str], None] = 'fdbd618928db'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('users', sa.Column('create_datetime', sa.DateTime(), nullable=False))
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_column('users', 'create_datetime')
+    # ### end Alembic commands ###
+
+```
+
+`alembic/versions/5087af87cc44_initial_models.py`:
+
+```py
+"""initial models
+
+Revision ID: 5087af87cc44
+Revises: 
+Create Date: 2026-02-10 19:58:54.712235
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '5087af87cc44'
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    pass
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    pass
+    # ### end Alembic commands ###
+
+```
+
+`alembic/versions/fdbd618928db_initial_schema.py`:
+
+```py
+"""initial schema
+
+Revision ID: fdbd618928db
+Revises: 5087af87cc44
+Create Date: 2026-02-16 19:31:34.491053
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'fdbd618928db'
+down_revision: Union[str, Sequence[str], None] = '5087af87cc44'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('food_type',
+    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('category_id')
+    )
+    op.create_table('users',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=29), nullable=False),
+    sa.Column('name', sa.String(length=29), nullable=False),
+    sa.Column('surname', sa.String(length=29), nullable=False),
+    sa.Column('patronymic', sa.String(length=29), nullable=True),
+    sa.Column('hash_password', sa.String(), nullable=False),
+    sa.Column('address', sa.String(), nullable=True),
+    sa.Column('phone', sa.String(), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('user_id'),
+    sa.UniqueConstraint('username')
+    )
+    op.create_table('menu_items',
+    sa.Column('menu_id', sa.Integer(), nullable=False),
+    sa.Column('food_name', sa.String(), nullable=True),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('image_url', sa.String(), nullable=True),
+    sa.Column('is_available', sa.Boolean(), nullable=True),
+    sa.Column('price', sa.Integer(), nullable=False),
+    sa.Column('preparation_time', sa.Time(), nullable=False),
+    sa.Column('category_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['category_id'], ['food_type.category_id'], ),
+    sa.PrimaryKeyConstraint('menu_id')
+    )
+    op.create_table('orders',
+    sa.Column('order_id', sa.Integer(), nullable=False),
+    sa.Column('create_datetime', sa.DateTime(), nullable=True),
+    sa.Column('end_datetime', sa.DateTime(), nullable=True),
+    sa.Column('status', sa.Enum('PENDING', 'COMPLETED', 'CANCELLED', name='status'), nullable=True),
+    sa.Column('delivery_address', sa.String(), nullable=False),
+    sa.Column('total_amount', sa.Integer(), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
+    sa.PrimaryKeyConstraint('order_id')
+    )
+    op.create_table('staff',
+    sa.Column('username', sa.String(), nullable=False),
+    sa.Column('role', sa.Enum('STAFF', 'ADMIN', name='role'), nullable=True),
+    sa.ForeignKeyConstraint(['username'], ['users.username'], ),
+    sa.PrimaryKeyConstraint('username')
+    )
+    op.create_table('order_items',
+    sa.Column('order_food_id', sa.Integer(), nullable=False),
+    sa.Column('menu_item_id', sa.Integer(), nullable=False),
+    sa.Column('order_id', sa.Integer(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=True),
+    sa.Column('price', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['menu_item_id'], ['menu_items.menu_id'], ),
+    sa.ForeignKeyConstraint(['order_id'], ['orders.order_id'], ),
+    sa.PrimaryKeyConstraint('order_food_id')
+    )
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('order_items')
+    op.drop_table('staff')
+    op.drop_table('orders')
+    op.drop_table('menu_items')
+    op.drop_table('users')
+    op.drop_table('food_type')
+    # ### end Alembic commands ###
+
+```
+
+`backend/Dockerfile`:
+
+```
+# backend/Dockerfile
+FROM python:3.11-slim
+
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Копируем зависимости из КОРНЯ проекта
+COPY requirements.txt ./
+
+RUN pip install --upgrade pip
+# Устанавливаем ВСЁ из uv.lock (включая alembic, ruff — как в pyproject.toml)
+RUN pip install -r requirements.txt
+
+# Копируем ТОЛЬКО код бэкенда
+COPY . .
+
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+EXPOSE 8000
+
+# Запуск приложения (переопределяется в docker-compose.yml)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+`backend/api/endpoints/auth.py`:
+
+```py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from core.security import (
+    create_access_token,
+    create_refresh_token,
+    verify_password,
+    get_current_user,
+    decode_token
+)
+from core.config import settings
+from schemas.auth import UserRegister, UserLogin, Token, RefreshTokenRequest
+from crud.users import (
+    create_user,
+    get_user_by_username,
+    get_user_by_email,
+    get_user_by_phone
+)
+from models.database import get_db
+from models.setting_up_db import Users
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=Token)
+async def register(user_data: UserRegister, db: Session = Depends(get_db)):
+    # Проверка уникальности (валидация контактов внутри CRUD)
+    if get_user_by_username(db, user_data.username):
+        raise HTTPException(status_code=400, detail="Username уже занят")
+    if get_user_by_email(db, user_data.email):
+        raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
+    if get_user_by_phone(db, user_data.phone):
+        raise HTTPException(status_code=400, detail="Телефон уже зарегистрирован")
+    
+    # Создание пользователя (валидация контактов и хеширование внутри)
+    try:
+        new_user = create_user(
+            db=db,
+            username=user_data.username,
+            password=user_data.password,
+            name=user_data.name,
+            surname=user_data.surname,
+            email=user_data.email,
+            phone=user_data.phone,
+            patronymic=user_data.patronymic,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    # Генерация токенов
+    access_token = create_access_token(data={"sub": new_user.username})
+    refresh_token = create_refresh_token(data={"sub": new_user.username})
+    
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_in=settings.access_token_expire_minutes * 60
+    )
+
+@router.post("/login", response_model=Token)
+async def login(form_data: UserLogin, db: Session = Depends(get_db)):
+    # Поддержка входа по username ИЛИ email
+    user = get_user_by_username(db, form_data.username)
+    if not user and '@' in form_data.username:
+        user = get_user_by_email(db, form_data.username)
+    
+    if not user or not verify_password(form_data.password, user.hash_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверное имя пользователя/email или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token = create_access_token(data={"sub": user.username})
+    refresh_token = create_refresh_token(data={"sub": user.username})
+    
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_in=settings.access_token_expire_minutes * 60
+    )
+
+@router.post("/refresh", response_model=Token)
+async def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
+    payload = decode_token(request.refresh_token)
+    
+    if payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверный тип токена",
+        )
+    
+    username: str = payload.get("sub")
+    if not username or not get_user_by_username(db, username):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Пользователь не найден"
+        )
+    
+    new_access_token = create_access_token(data={"sub": username})
+    
+    return Token(
+        access_token=new_access_token,
+        refresh_token=request.refresh_token,
+        expires_in=settings.access_token_expire_minutes * 60
+    )
+
+@router.get("/me")
+async def get_current_user_info(current_user: Users = Depends(get_current_user)):
+    return {
+        "user_id": current_user.user_id,
+        "username": current_user.username,
+        "name": current_user.name,
+        "surname": current_user.surname,
+        "patronymic": current_user.patronymic,
+        "email": current_user.email,
+        "phone": current_user.phone,
+        "address": current_user.address,
+        "is_staff": current_user.staff is not None,
+        "role": current_user.staff.role.name if current_user.staff else None
+    }
+```
+
+`backend/api/endpoints/staff.py`:
+
+```py
+# backend/api/endpoints/staff.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from schemas.staff import StaffCreate, StaffResponse, RoleEnum
+from crud.staff import create_staff, get_staff_by_username, get_staff_with_details
+from crud.users import get_user_by_username
+from models.setting_up_db import Role as DBRole, Users
+from models.database import get_db
+from core.security import get_current_admin
+
+router = APIRouter(prefix="/staff", tags=["staff"])
+
+@router.post("/", response_model=StaffResponse, status_code=status.HTTP_201_CREATED)
+def create_staff_member(
+    staff_data: StaffCreate,
+    current_user: Users = Depends(get_current_admin),  # Только администратор может создавать сотрудников
+    db: Session = Depends(get_db)
+):
+    """
+    Назначает существующего пользователя сотрудником.
+    Требует: пользователь уже зарегистрирован в системе.
+    """
+    # Проверяем существование пользователя
+    user = get_user_by_username(db, staff_data.username)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Пользователь с username '{staff_data.username}' не найден. Сначала зарегистрируйте пользователя."
+        )
+    
+    # Проверяем, не является ли пользователь уже сотрудником
+    if get_staff_by_username(db, staff_data.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Пользователь '{staff_data.username}' уже является сотрудником"
+        )
+    
+    # Конвертируем роль из схемы в модель БД
+    role_enum = DBRole[staff_data.role.name]
+    
+    # Создаём запись сотрудника
+    try:
+        create_staff(db, username=staff_data.username, role=role_enum)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    
+    # Возвращаем полную информацию о сотруднике
+    staff_details = get_staff_with_details(db, staff_data.username)
+    if not staff_details:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Не удалось получить данные о сотруднике после создания"
+        )
+    
+    return StaffResponse(
+        username=staff_details["username"],
+        role=staff_details["role"],
+        user_id=staff_details["user_id"],
+        name=staff_details["name"],
+        surname=staff_details["surname"],
+        email=staff_details["email"],
+        phone=staff_details["phone"]
+    )
+
+@router.get("/me", response_model=StaffResponse)
+def get_current_staff_info(
+    current_user: Users = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Получает информацию о текущем пользователе как о сотруднике.
+    """
+    staff_details = get_staff_with_details(db, current_user.username)
+    if not staff_details:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="У вас нет прав сотрудника"
+        )
+    return StaffResponse(**staff_details)
+```
+
+`backend/core/config.py`:
+
+```py
+import os
+from functools import lru_cache
+
+try:
+    from pydantic_settings import BaseSettings  # Pydantic v2
+except ImportError:
+    from pydantic import BaseSettings  # Pydantic v1 (fallback)
+
+class Settings(BaseSettings):
+    # JWT
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+    
+    # БД (опционально, если не используете отдельный DATABASE_URL)
+    postgres_user: str = "postgres"
+    postgres_password: str
+    postgres_db: str = "restaurant"
+    postgres_host: str = "localhost"
+    postgres_port: str = "5432"
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+
+settings = get_settings()
+```
+
+`backend/core/security.py`:
+
+```py
+from datetime import datetime, timedelta
+from typing import Optional, Union
+from jose import JWTError, jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+from core.config import settings
+from models.setting_up_db import Users
+from models.database import get_db
+from schemas.auth import TokenData
+from utils.security import verify_password  # hash_password не нужен здесь
+
+# Настройки JWT
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+REFRESH_TOKEN_EXPIRE_DAYS = settings.refresh_token_expire_days
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    to_encode.update({"exp": expire, "type": "access"})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def create_refresh_token(data: dict) -> str:
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode = {**data, "exp": expire, "type": "refresh"}
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверный или просроченный токен",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> Users:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Не удалось проверить учетные данные",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    payload = decode_token(token)
+    if payload.get("type") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Требуется access token",
+        )
+    
+    username: str = payload.get("sub")
+    if username is None:
+        raise credentials_exception
+    
+    user = db.query(Users).filter(Users.username == username).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+async def get_current_active_user(
+    current_user: Users = Depends(get_current_user)
+) -> Users:
+    # Добавьте проверку is_active/banned при необходимости
+    return current_user
+
+async def get_current_admin(
+    current_user: Users = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Users:
+    from backend.crud.staff import is_staff
+    if not is_staff(db, current_user.username):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Требуются права администратора"
+        )
+    return current_user
+```
+
+`backend/crud/food_type.py`:
+
+```py
+from sqlalchemy.orm import Session
+from backend.models.setting_up_db import FoodType
+from typing import Optional, List
+
+def create_food_category(db: Session, category_id: int, name: str) -> FoodType:
+    """Создаёт новую категорию еды"""
+    if get_food_category_by_name(db, name):
+        raise ValueError(f"Категория '{name}' уже существует")
+    if get_food_category(db, category_id=category_id):
+        raise ValueError(f"Категория с ID: {category_id} уже существует")
+    category = FoodType(category_id=category_id, name=name)
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+    return category
+
+def get_food_category(db: Session, category_id: int) -> Optional[FoodType]:
+    """Получает категорию по ID"""
+    return db.query(FoodType).filter(FoodType.category_id == category_id).first()
+
+def get_food_category_by_name(db: Session, name: str) -> Optional[FoodType]:
+    """Получает категорию по названию"""
+    return db.query(FoodType).filter(FoodType.name == name).first()
+
+def get_food_categories(db: Session) -> List[FoodType]:
+    """Получает все категории"""
+    return db.query(FoodType).all()
+
+def update_food_category(
+    db: Session, 
+    category_id: int, 
+    name: Optional[str] = None
+) -> Optional[FoodType]:
+    """Обновляет категорию"""
+    category = get_food_category(db, category_id)
+    if not category:
+        return None
+    
+    if name and name != category.name:
+        if get_food_category_by_name(db, name):
+            raise ValueError(f"Категория '{name}' уже существует")
+        category.name = name
+    
+    db.commit()
+    db.refresh(category)
+    return category
+
+def delete_food_category(db: Session, category_id: int) -> bool:
+    """Удаляет категорию (только если нет привязанных элементов меню)"""
+    category = get_food_category(db, category_id)
+    if not category:
+        return False
+    
+    if category.menu_items:  # Проверка связанных элементов
+        raise ValueError(
+            f"Нельзя удалить категорию '{category.name}': "
+            f"есть {len(category.menu_items)} привязанных элементов меню"
+        )
+    
+    db.delete(category)
+    db.commit()
+    return True
+```
+
+`backend/crud/menu.py`:
+
+```py
+from sqlalchemy.orm import Session
+from models.setting_up_db import MenuItems, FoodType
+from datetime import time
+from typing import Optional, List
+
+def create_menu_item(
+    db: Session,
+    food_name: str,
+    price: int,
+    category_id: int,
+    description: str = None,
+    image_url: str = None,
+    is_available: bool = True,
+    preparation_time: time = None
+) -> MenuItems:
+    """Создаёт новый элемент меню"""
+    db_item = MenuItems(
+        food_name=food_name,
+        description=description,
+        image_url=image_url,
+        is_available=is_available,
+        price=price,
+        preparation_time=preparation_time or time(0, 15),  # 15 минут по умолчанию
+        category_id=category_id
+    )
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+def get_menu_items(
+    db: Session,
+    category_id: Optional[int] = None,
+    available_only: bool = True,
+    min_price: Optional[int] = None,
+    max_price: Optional[int] = None
+) -> List[MenuItems]:
+    """Получает элементы меню с фильтрацией"""
+    query = db.query(MenuItems)
+    
+    if category_id is not None:
+        query = query.filter(MenuItems.category_id == category_id)
+    
+    if available_only:
+        query = query.filter(MenuItems.is_available == True)
+    
+    if min_price is not None:
+        query = query.filter(MenuItems.price >= min_price)
+    
+    if max_price is not None:
+        query = query.filter(MenuItems.price <= max_price)
+    
+    return query.all()
+
+def get_menu_item(db: Session, menu_id: int) -> Optional[MenuItems]:
+    """Получает элемент меню по ID"""
+    return db.query(MenuItems).filter(MenuItems.menu_id == menu_id).first()
+
+def update_menu_item(
+    db: Session,
+    menu_id: int,
+    food_name: Optional[str] = None,
+    description: Optional[str] = None,
+    image_url: Optional[str] = None,
+    is_available: Optional[bool] = None,
+    price: Optional[int] = None,
+    preparation_time: Optional[time] = None,
+    category_id: Optional[int] = None
+) -> Optional[MenuItems]:
+    """Обновляет элемент меню"""
+    item = get_menu_item(db, menu_id)
+    if not item:
+        return None
+    
+    updates = {
+        'food_name': food_name,
+        'description': description,
+        'image_url': image_url,
+        'is_available': is_available,
+        'price': price,
+        'preparation_time': preparation_time,
+        'category_id': category_id
+    }
+    
+    for field, value in updates.items():
+        if value is not None:
+            if field == 'price' and value <= 0:
+                raise ValueError("Цена должна быть положительной")
+            setattr(item, field, value)
+    
+    db.commit()
+    db.refresh(item)
+    return item
+
+def delete_menu_item(db: Session, menu_id: int) -> bool:
+    """Удаляет элемент меню"""
+    item = get_menu_item(db, menu_id)
+    if not item:
+        return False
+    
+    db.delete(item)
+    db.commit()
+    return True
+```
+
+`backend/crud/order_items.py`:
+
+```py
+from sqlalchemy.orm import Session
+from models.setting_up_db import OrderItems
+from typing import Optional, List
+
+def create_order_item(
+    db: Session,
+    order_id: int,
+    menu_item_id: int,
+    quantity: int,
+    price: int  # Зафиксированная цена на момент заказа!
+) -> OrderItems:
+    """
+    Создаёт элемент заказа.
+    ВАЖНО: price должен быть передан из меню на момент создания заказа!
+    """
+    if quantity <= 0:
+        raise ValueError("Количество должно быть положительным")
+    if price <= 0:
+        raise ValueError("Цена должна быть положительной")
+    
+    item = OrderItems(
+        order_id=order_id,
+        menu_item_id=menu_item_id,
+        quantity=quantity,
+        price=price
+    )
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+def get_order_item(db: Session, order_food_id: int) -> Optional[OrderItems]:
+    """Получает элемент заказа по ID"""
+    return db.query(OrderItems).filter(OrderItems.order_food_id == order_food_id).first()
+
+def get_order_items_by_order(db: Session, order_id: int) -> List[OrderItems]:
+    """Получает все элементы заказа по order_id"""
+    return db.query(OrderItems).filter(OrderItems.order_id == order_id).all()
+
+def update_order_item_quantity(
+    db: Session,
+    order_food_id: int,
+    new_quantity: int
+) -> Optional[OrderItems]:
+    """
+    Обновляет количество в элементе заказа.
+    Пересчитывает total_amount заказа автоматически.
+    """
+    item = get_order_item(db, order_food_id)
+    if not item:
+        return None
+    
+    if new_quantity <= 0:
+        raise ValueError("Новое количество должно быть положительным")
+    
+    # Обновляем количество
+    old_quantity = item.quantity
+    item.quantity = new_quantity
+    db.commit()
+    
+    # Пересчитываем общую сумму заказа
+    _recalculate_order_total(db, item.order_id)
+    
+    db.refresh(item)
+    return item
+
+def delete_order_item(db: Session, order_food_id: int) -> bool:
+    """Удаляет элемент заказа и пересчитывает сумму заказа"""
+    item = get_order_item(db, order_food_id)
+    if not item:
+        return False
+    
+    order_id = item.order_id
+    db.delete(item)
+    db.commit()
+    
+    # Пересчитываем общую сумму заказа
+    _recalculate_order_total(db, order_id)
+    return True
+
+def _recalculate_order_total(db: Session, order_id: int) -> None:
+    """Вспомогательная функция: пересчитывает total_amount заказа"""
+    from backend.crud.orders import get_order_by_id
+    order = get_order_by_id(db, order_id)
+    if not order:
+        return
+    
+    # Суммируем все элементы заказа
+    new_total = sum(item.quantity * item.price for item in order.items)
+    order.total_amount = new_total
+    db.commit()
+```
+
+`backend/crud/orders.py`:
+
+```py
+from sqlalchemy.orm import Session
+from models.setting_up_db import Order, OrderItems, Status
+from typing import Optional, List, Dict
+from datetime import datetime
+
+def create_order(
+    db: Session,
+    user_id: int,
+    delivery_address: str,
+    items: List[Dict[str, int]],  # [{"menu_item_id": 1, "quantity": 2}, ...]
+    description: Optional[str] = None
+) -> Order:
+    """
+    Создаёт заказ со всеми элементами в одной транзакции.
+    items: список словарей с menu_item_id и quantity
+    Автоматически рассчитывает total_amount на основе цен из меню на момент создания.
+    """
+    # Проверяем наличие пользователя
+    from backend.crud.users import get_user_by_id
+    if not get_user_by_id(db, user_id):
+        raise ValueError(f"Пользователь с ID {user_id} не существует")
+    
+    # Проверяем и рассчитываем элементы
+    total_amount = 0
+    validated_items = []
+    
+    from backend.crud.menu_items import get_menu_item
+    for item in items:
+        menu_item = get_menu_item(db, item["menu_item_id"])
+        if not menu_item:
+            raise ValueError(f"Элемент меню с ID {item['menu_item_id']} не существует")
+        if not menu_item.is_available:
+            raise ValueError(f"Элемент '{menu_item.food_name}' недоступен для заказа")
+        if item["quantity"] <= 0:
+            raise ValueError(f"Количество для '{menu_item.food_name}' должно быть > 0")
+        
+        # Фиксируем цену на момент заказа (важно!)
+        item_total = menu_item.price * item["quantity"]
+        total_amount += item_total
+        validated_items.append({
+            "menu_item_id": menu_item.menu_id,
+            "quantity": item["quantity"],
+            "price": menu_item.price,  # Текущая цена из меню
+            "item_total": item_total
+        })
+    
+    if total_amount <= 0:
+        raise ValueError("Общая сумма заказа должна быть положительной")
+    
+    if not delivery_address or len(delivery_address.strip()) < 5:
+        raise ValueError("Адрес доставки должен содержать минимум 5 символов")
+    
+    # Создаём заказ
+    order = Order(
+        user_id=user_id,
+        create_datetime=datetime.utcnow(),
+        status=Status.PENDING,
+        delivery_address=delivery_address.strip(),
+        total_amount=total_amount,
+        description=description
+    )
+    db.add(order)
+    db.flush()  # Получаем order_id для элементов
+    
+    # Создаём элементы заказа
+    from backend.crud.order_items import create_order_item
+    for item in validated_items:
+        create_order_item(
+            db,
+            order_id=order.order_id,
+            menu_item_id=item["menu_item_id"],
+            quantity=item["quantity"],
+            price=item["price"]  # Зафиксированная цена
+        )
+    
+    db.commit()
+    db.refresh(order)
+    return order
+
+def get_order_by_id(db: Session, order_id: int) -> Optional[Order]:
+    """Получает заказ по ID со всеми элементами"""
+    return db.query(Order).filter(Order.order_id == order_id).first()
+
+def get_orders_by_user(db: Session, user_id: int, status: Optional[Status] = None) -> List[Order]:
+    """Получает все заказы пользователя (с фильтрацией по статусу)"""
+    query = db.query(Order).filter(Order.user_id == user_id)
+    if status:
+        query = query.filter(Order.status == status)
+    return query.order_by(Order.create_datetime.desc()).all()
+
+def get_all_orders(db: Session, status: Optional[Status] = None) -> List[Order]:
+    """Получает все заказы (для админки)"""
+    query = db.query(Order)
+    if status:
+        query = query.filter(Order.status == status)
+    return query.order_by(Order.create_datetime.desc()).all()
+
+def update_order_status(
+    db: Session,
+    order_id: int,
+    new_status: Status,
+    end_datetime: Optional[datetime] = None
+) -> Optional[Order]:
+    """Обновляет статус заказа и время завершения при необходимости"""
+    order = get_order_by_id(db, order_id)
+    if not order:
+        return None
+    
+    # Логика переходов статусов (опционально)
+    if order.status == Status.CANCELLED and new_status != Status.CANCELLED:
+        raise ValueError("Отменённый заказ нельзя изменить на другой статус")
+    
+    order.status = new_status
+    
+    # Автоматически устанавливаем время завершения для завершённых/отменённых заказов
+    if new_status in (Status.COMPLETED, Status.CANCELLED):
+        order.end_datetime = end_datetime or datetime.utcnow()
+    elif new_status == Status.PENDING:
+        order.end_datetime = None  # Сбрасываем если вернули в ожидание
+    
+    db.commit()
+    db.refresh(order)
+    return order
+
+def cancel_order(db: Session, order_id: int) -> Optional[Order]:
+    """Удобный метод для отмены заказа"""
+    return update_order_status(db, order_id, Status.CANCELLED)
+
+def complete_order(db: Session, order_id: int) -> Optional[Order]:
+    """Удобный метод для завершения заказа"""
+    return update_order_status(db, order_id, Status.COMPLETED)
+
+def delete_order(db: Session, order_id: int) -> bool:
+    """
+    Удаляет заказ и ВСЕ его элементы (каскадное удаление).
+    Рекомендуется использовать только для тестов или отменённых заказов.
+    """
+    order = get_order_by_id(db, order_id)
+    if not order:
+        return False
+    
+    # Защита от удаления активных заказов
+    if order.status not in (Status.CANCELLED, Status.PENDING):
+        raise ValueError(
+            f"Нельзя удалить заказ со статусом {order.status.name}. "
+            "Сначала отмените заказ."
+        )
+    
+    db.delete(order)
+    db.commit()
+    return True
+
+def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
+    """
+    Возвращает полную информацию о заказе в виде словаря:
+    - данные заказа
+    - информация о пользователе
+    - список элементов с деталями из меню
+    """
+    order = get_order_by_id(db, order_id)
+    if not order:
+        return None
+    
+    items = []
+    for item in order.items:
+        items.append({
+            "order_food_id": item.order_food_id,
+            "food_name": item.menu_item.food_name if item.menu_item else "Удалённый элемент",
+            "quantity": item.quantity,
+            "price_per_item": item.price,
+            "total": item.quantity * item.price,
+            "image_url": item.menu_item.image_url if item.menu_item else None
+        })
+    
+    return {
+        "order_id": order.order_id,
+        "status": order.status.name,
+        "create_datetime": order.create_datetime.isoformat(),
+        "end_datetime": order.end_datetime.isoformat() if order.end_datetime else None,
+        "delivery_address": order.delivery_address,
+        "total_amount": order.total_amount,
+        "description": order.description,
+        "user": {
+            "user_id": order.user.user_id,
+            "username": order.user.username,
+            "name": f"{order.user.name} {order.user.surname}",
+            "phone": order.user.phone
+        },
+        "items": items
+    }
+```
+
+`backend/crud/staff.py`:
+
+```py
+from sqlalchemy.orm import Session
+from models.setting_up_db import Staff, Users, Role
+from typing import Optional, List
+from enum import Enum
+
+def create_staff(
+    db: Session,
+    username: str,
+    role: Role
+) -> Staff:
+    """
+    Создаёт запись сотрудника.
+    Требует: пользователь с таким username уже существует в Users.
+    """
+    # Проверяем существование пользователя
+    user = db.query(Users).filter(Users.username == username).first()
+    if not user:
+        raise ValueError(f"Пользователь с username '{username}' не существует")
+    
+    # Проверяем, не является ли пользователь уже сотрудником
+    existing_staff = get_staff_by_username(db, username)
+    if existing_staff:
+        raise ValueError(f"Пользователь '{username}' уже является сотрудником")
+    
+    # Создаём запись сотрудника
+    staff = Staff(username=username, role=role)
+    db.add(staff)
+    db.commit()
+    db.refresh(staff)
+    return staff
+
+def get_staff_by_username(db: Session, username: str) -> Optional[Staff]:
+    """Получает запись сотрудника по username"""
+    return db.query(Staff).filter(Staff.username == username).first()
+
+def get_staff_by_user_id(db: Session, user_id: int) -> Optional[Staff]:
+    """Получает запись сотрудника по user_id (через связь с Users)"""
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    if not user:
+        return None
+    return user.staff  # Используем relationship
+
+def get_all_staff(db: Session, role: Optional[Role] = None) -> List[Staff]:
+    """Получает всех сотрудников (с фильтрацией по роли)"""
+    query = db.query(Staff)
+    if role:
+        query = query.filter(Staff.role == role)
+    return query.all()
+
+def update_staff_role(
+    db: Session,
+    username: str,
+    new_role: Role
+) -> Optional[Staff]:
+    """Обновляет роль сотрудника"""
+    staff = get_staff_by_username(db, username)
+    if not staff:
+        return None
+    
+    staff.role = new_role
+    db.commit()
+    db.refresh(staff)
+    return staff
+
+def delete_staff(db: Session, username: str) -> bool:
+    """
+    Удаляет запись сотрудника (НЕ удаляет пользователя из Users!).
+    После удаления пользователь остаётся в системе как обычный клиент.
+    """
+    staff = get_staff_by_username(db, username)
+    if not staff:
+        return False
+    
+    db.delete(staff)
+    db.commit()
+    return True
+
+def is_staff(db: Session, username: str) -> bool:
+    """Проверяет, является ли пользователь сотрудником"""
+    return get_staff_by_username(db, username) is not None
+
+def get_staff_with_details(db: Session, username: str) -> Optional[dict]:
+    """
+    Получает полную информацию о сотруднике (включая данные пользователя)
+    Возвращает словарь с данными или None
+    """
+    staff = get_staff_by_username(db, username)
+    if not staff:
+        return None
+    
+    return {
+        "username": staff.username,
+        "role": staff.role.name,
+        "user_id": staff.user.user_id,
+        "name": staff.user.name,
+        "surname": staff.user.surname,
+        "email": staff.user.email,
+        "phone": staff.user.phone
+    }
+```
+
+`backend/crud/users.py`:
+
+```py
+import re
+from sqlalchemy.orm import Session
+from models.setting_up_db import Users
+from utils.security import hash_password
+from datetime import datetime
+
+# ======================
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ВАЛИДАЦИИ
+# ======================
+
+def _validate_email(email: str) -> str:
+    """Валидирует и нормализует email"""
+    email = email.strip().lower()
+    
+    # Базовая проверка формата
+    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+        raise ValueError("Некорректный формат email")
+    
+    # Защита от известных проблем
+    if len(email) > 254:
+        raise ValueError("Email слишком длинный (макс. 254 символа)")
+    if '..' in email or email.startswith('.') or email.endswith('.'):
+        raise ValueError("Email содержит недопустимые символы")
+    
+    return email
+
+def _normalize_phone(phone: str) -> str:
+    """
+    Нормализует телефон к формату +7 (XXX) XXX-XX-XX
+    Принимает: +79086430688, 89086430688, 9086430688 и т.д.
+    """
+    # Удаляем всё кроме цифр и +
+    cleaned = re.sub(r'[^\d+]', '', phone.strip())
+    
+    # Извлекаем только цифры
+    digits = re.sub(r'\D', '', cleaned)
+    
+    # Валидация длины (10-11 цифр для РФ)
+    if len(digits) == 10:
+        digits = '7' + digits  # Добавляем код страны
+    elif len(digits) == 11 and digits.startswith('8'):
+        digits = '7' + digits[1:]
+    elif len(digits) != 11 or not digits.startswith('7'):
+        raise ValueError(
+            "Некорректный номер телефона. "
+            "Ожидается формат: +79086430688, 89086430688 или 9086430688"
+        )
+    
+    # Форматируем красиво для хранения
+    return f"+7 ({digits[1:4]}) {digits[4:7]}-{digits[7:9]}-{digits[9:11]}"
+
+# ======================
+# ОСНОВНЫЕ CRUD-ФУНКЦИИ С ВАЛИДАЦИЕЙ
+# ======================
+
+def create_user(
+    db: Session,
+    username: str,
+    password: str,
+    name: str,
+    surname: str,
+    email: str,
+    phone: str,
+    patronymic: str = None,
+    address: str = None
+) -> Users:
+    # Валидация контактов ПЕРЕД созданием
+    validated_email = _validate_email(email)
+    normalized_phone = _normalize_phone(phone)
+    
+    # Проверка уникальности
+    if get_user_by_email(db, validated_email):
+        raise ValueError(f"Email '{validated_email}' уже зарегистрирован")
+    if get_user_by_phone(db, normalized_phone):
+        raise ValueError(f"Телефон '{normalized_phone}' уже зарегистрирован")
+    
+    # Хеширование пароля (уже есть в вашем коде)
+    db_user = Users(
+        username=username,
+        hash_password=hash_password(password),
+        name=name,
+        surname=surname,
+        patronymic=patronymic,
+        email=validated_email,      # Сохраняем нормализованный email
+        phone=normalized_phone,     # Сохраняем красивый формат телефона
+        address=address,
+        create_datetime=datetime.utcnow()
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    if not user:
+        return None
+    
+    allowed_fields = {'name', 'surname', 'patronymic', 'address', 'phone', 'email'}
+    
+    for key, value in kwargs.items():
+        if key not in allowed_fields or value is None:
+            continue
+        
+        # Специальная валидация для контактов
+        if key == 'email':
+            value = _validate_email(value)
+            # Проверка уникальности (игнорируем текущего пользователя)
+            existing = db.query(Users).filter(
+                Users.email == value,
+                Users.user_id != user_id
+            ).first()
+            if existing:
+                raise ValueError(f"Email '{value}' уже используется другим пользователем")
+        
+        elif key == 'phone':
+            value = _normalize_phone(value)
+            # Проверка уникальности
+            existing = db.query(Users).filter(
+                Users.phone == value,
+                Users.user_id != user_id
+            ).first()
+            if existing:
+                raise ValueError(f"Телефон '{value}' уже используется другим пользователем")
+        
+        setattr(user, key, value)
+    
+    db.commit()
+    db.refresh(user)
+    return user
+
+# ======================
+# ДОПОЛНИТЕЛЬНЫЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# ======================
+
+def get_user_by_username(db: Session, username: str) -> Users | None:
+    return db.query(Users).filter(Users.username == username).first()
+
+def get_user_by_phone(db: Session, phone: str) -> Users | None:
+    """Получает пользователя по НОРМАЛИЗОВАННОМУ телефону"""
+    normalized = _normalize_phone(phone)
+    return db.query(Users).filter(Users.phone == normalized).first()
+
+def get_user_by_email(db: Session, email: str) -> Users | None:
+    email = _validate_email(email)
+    return db.query(Users).filter(Users.email == email).first()
+
+def search_users_by_contact(db: Session, query: str) -> list[Users]:
+    """
+    Поиск пользователей по частичному совпадению email или телефона
+    Удобно для админки
+    """
+    normalized_query = re.sub(r'[^\w@+]', '', query)
+    return db.query(Users).filter(
+        (Users.email.contains(normalized_query)) |
+        (Users.phone.contains(normalized_query))
+    ).all()
+
+def delete_user(db: Session, user_id: int) -> bool:
+    """Удаляет пользователя"""
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    if user:
+        db.delete(user)
+        db.commit()
+        return True
+    return False
+```
+
+`backend/main.py`:
+
+```py
+# backend/main.py
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from api.endpoints import auth, staff
+from models.database import engine
+
+app = FastAPI(title="BOOZA_SHOP API", version="1.0.0")
+
+# Роутеры
+app.include_router(auth.router)
+app.include_router(staff.router)
+
+@app.get("/")
+async def root():
+    return {
+        "app": "BOOZA_SHOP API",
+        "docs": "/docs",
+        "redoc": "/redoc"
+    }
+```
+
+`backend/models/database.py`:
+
+```py
+# backend/models/database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from contextlib import contextmanager
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Формируем URL подключения
+DATABASE_URL = (
+    f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
+    f"@{os.getenv('POSTGRES_HOST', 'localhost')}:{os.getenv('POSTGRES_PORT', '5432')}"
+    f"/{os.getenv('POSTGRES_DB')}"
+)
+
+# Создаём движок и фабрику сессий
+engine = create_engine(DATABASE_URL, echo=False)  # echo=True для отладки SQL
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+@contextmanager
+def get_db_session():
+    """Контекстный менеджер для безопасной работы с сессией"""
+    session = SessionLocal()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+# Для использования в FastAPI как зависимость
+def get_db():
+    """Dependency для FastAPI"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+```
+
+`backend/models/init_db.py`:
+
+```py
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import sessionmaker
+from setting_up_db import Base, Order, OrderItems, MenuItems, FoodType, Users, Staff
+from dotenv import load_dotenv
+import os
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)-8s | %(filename)s:%(lineno)d | %(funcName)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("debug.log", encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+load_dotenv()
+
+DB_URL = (
+        f"postgresql+psycopg2://"
+        f"{os.getenv('POSTGRES_USER', 'postgres')}:"
+        f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}@"
+        f"{os.getenv('POSTGRES_HOST', 'localhost')}:{os.getenv('POSTGRES_PORT', '5432')}/"
+        f"{os.getenv('POSTGRES_DB', 'restaurant')}"
+)
+logger.info(DB_URL)
+
+def init_database():
+    engine = create_engine(
+        DB_URL,
+        echo=True,
+    )
+
+    logger.info("Создание таблиц")
+    Base.metadata.create_all(engine)
+    logger.info("Таблицы успешно созданы!")
+
+    with engine.connect() as conn:
+        logger.info(f"Подключение к БД установлено: {DB_URL}")
+
+    return engine
+
+if __name__ == "__main__":
+    try:
+        engine = init_database()
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    except Exception as e:
+        logger.error(f"Ошибка при инициализации БД: {e}")
+
+```
+
+`backend/models/setting_up_db.py`:
+
+```py
+from sqlalchemy import MetaData, Column, Integer, String, Time, DateTime, CheckConstraint, Enum, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+import enum
+
+Base = declarative_base()
+
+class Status(enum.Enum):
+    PENDING = 1
+    COMPLETED = 2
+    CANCELLED = 3
+
+class Role(enum.Enum):
+    STAFF = 1
+    ADMIN = 2
+
+class Order(Base):
+    __tablename__ = 'orders'
+
+    order_id = Column(Integer, primary_key=True)
+    create_datetime = Column(DateTime, default=datetime.utcnow)
+    end_datetime = Column(DateTime, nullable=True)
+    status = Column(Enum(Status))
+    delivery_address = Column(String, nullable=False)
+    total_amount = Column(Integer, nullable=False)
+    description = Column(String, nullable=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+
+    user = relationship('Users', back_populates='orders')
+    items = relationship('OrderItems', back_populates='order')
+
+class OrderItems(Base):
+    __tablename__ = 'order_items'
+
+    order_food_id = Column(Integer, primary_key=True)
+    menu_item_id = Column(Integer, ForeignKey('menu_items.menu_id'), nullable=False)
+    order_id = Column(Integer, ForeignKey('orders.order_id'), nullable=False)
+    quantity = Column(Integer)
+    price = Column(Integer)
+
+    order = relationship('Order', back_populates='items')
+    menu_item = relationship('MenuItems', back_populates='order_items')
+
+class MenuItems(Base):
+    __tablename__ = 'menu_items'
+    
+    menu_id = Column(Integer, primary_key=True)
+    food_name = Column(String)
+    description = Column(String)
+    image_url = Column(String)
+    is_available = Column(Boolean)
+    price = Column(Integer, CheckConstraint('price > 0'), nullable=False)
+    preparation_time = Column(Time, nullable=False)
+    category_id = Column(Integer, ForeignKey('food_type.category_id'))
+
+    order_items = relationship("OrderItems", back_populates="menu_item")
+    category = relationship("FoodType", back_populates="menu_items")
+
+class FoodType(Base):
+    __tablename__ = 'food_type'
+
+    category_id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+    menu_items = relationship("MenuItems", back_populates="category")
+
+class Users(Base):
+    __tablename__ = 'users'
+
+    user_id = Column(Integer, primary_key=True)
+    username = Column(String(29), CheckConstraint('LENGTH(username) >= 2'), unique=True, nullable=False)
+    name = Column(String(29), CheckConstraint('LENGTH(name) >= 2'), nullable=False)
+    surname = Column(String(29), CheckConstraint('LENGTH(surname) >= 2'), nullable=False)
+    patronymic = Column(String(29), CheckConstraint('LENGTH(patronymic) >= 2'), nullable=True)
+    hash_password = Column(String, nullable=False)
+    address = Column(String)
+    phone = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    create_datetime = Column(DateTime, nullable=False)
+
+    orders = relationship("Order", back_populates="user")
+    staff = relationship("Staff", back_populates="user", uselist=False)
+
+class Staff(Base):
+    __tablename__ = 'staff'
+
+    username = Column(String, ForeignKey('users.username'), primary_key=True)
+    role = Column(Enum(Role))
+
+    user = relationship("Users", back_populates="staff")
+```
+
+`backend/requirements.txt`:
+
+```txt
+alembic==1.18.3
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.12.1
+bcrypt==5.0.0
+cffi==2.0.0
+cryptography==46.0.5
+ecdsa==0.19.1
+fastapi==0.128.0
+greenlet==3.3.1
+idna==3.11
+mako==1.3.10
+markupsafe==3.0.3
+passlib==1.7.4
+psycopg2-binary==2.9.11
+pyasn1==0.6.2
+pycparser==3.0
+pydantic==2.12.5
+pydantic-core==2.41.5
+pydantic-settings==2.13.0
+python-dotenv==1.2.1
+python-jose==3.5.0
+python-multipart==0.0.22
+rsa==4.9.1
+ruff==0.15.0
+six==1.17.0
+sqlalchemy==2.0.46
+starlette==0.50.0
+typing-extensions==4.15.0
+typing-inspection==0.4.2
+uvicorn[standard]
+pydantic[email]
+```
+
+`backend/schemas/auth.py`:
+
+```py
+from pydantic import BaseModel, EmailStr, Field, validator
+from typing import Optional
+
+class UserRegister(BaseModel):
+    username: str = Field(..., min_length=2, max_length=29, description="Уникальное имя пользователя")
+    password: str = Field(..., min_length=6, max_length=1024, description="Пароль")
+    name: str = Field(..., min_length=2, max_length=29, description="Имя")
+    surname: str = Field(..., min_length=2, max_length=29, description="Фамилия")
+    email: EmailStr = Field(..., description="Email")
+    phone: str = Field(..., min_length=10, max_length=20, description="Телефон")
+    patronymic: Optional[str] = Field(None, max_length=29, description="Отчество")
+
+    @validator('phone')
+    def validate_phone_format(cls, v):
+        if not any(c.isdigit() for c in v):
+            raise ValueError('Телефон должен содержать цифры')
+        return v.strip()
+
+class UserLogin(BaseModel):
+    username: str = Field(..., description="Имя пользователя или email")
+    password: str = Field(..., description="Пароль")
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+```
+
+`backend/schemas/staff.py`:
+
+```py
+# backend/schemas/staff.py
+from pydantic import BaseModel, Field
+from typing import Optional
+from enum import Enum
+
+class RoleEnum(str, Enum):
+    STAFF = "STAFF"
+    ADMIN = "ADMIN"
+
+class StaffCreate(BaseModel):
+    username: str = Field(..., min_length=2, max_length=29, description="Username существующего пользователя")
+    role: RoleEnum = Field(default=RoleEnum.STAFF, description="Роль сотрудника")
+
+class StaffResponse(BaseModel):
+    username: str
+    role: str
+    user_id: int
+    name: str
+    surname: str
+    email: str
+    phone: str
+
+    class Config:
+        orm_mode = True
+```
+
+`backend/test/test_food_type.py`:
+
+```py
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+from backend.models.database import get_db_session
+from backend.crud.food_type import create_food_category, get_food_categories, get_food_category_by_name, get_food_category, update_food_category, delete_food_category
+from datetime import time   
+
+def test_create_food_type():
+    with get_db_session() as db:
+        food_category = create_food_category(
+            db=db,
+            category_id=1,
+            name="Фастфуд"
+        )
+        print(food_category)
+
+if __name__ == "__main__":
+    test_create_food_type()
+```
+
+`backend/test/test_menu.py`:
+
+```py
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+from backend.models.database import get_db_session
+from backend.crud.menu import create_menu_item, update_menu_item, delete_menu_item, get_menu_item, get_menu_items
+from datetime import time
+
+def add_menu_item():
+    with get_db_session() as db:
+        menu_item = create_menu_item(
+            db=db,
+            food_name="Чизбургер",
+            price=150,
+            category_id=1,
+            description="Вкуснеший чизбургер",
+            image_url=None,
+            is_available=True,
+            preparation_time=time(0, 5, 0))
+        print(menu_item)
+
+if __name__ == "__main__":
+    add_menu_item()
+```
+
+`backend/test/test_staff.py`:
+
+```py
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+from backend.models.database import get_db_session
+from backend.crud.staff import get_all_staff, get_staff_by_user_id, get_staff_by_username, get_staff_with_details, create_staff, update_staff_role, delete_staff
+from backend.models.setting_up_db import Role
+from datetime import time
+
+def _create_staff():
+    with get_db_session() as db:
+        staff = create_staff(
+            db=db,
+            username="Admin",
+            role=Role.ADMIN
+        )
+        print(staff)
+
+if __name__ == "__main__":
+    _create_staff()
+```
+
+`backend/test/test_user.py`:
+
+```py
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+from backend.models.database import get_db_session
+from backend.crud.users import create_user, update_user, get_user_by_email
+from datetime import time
+
+def test_user():
+    with get_db_session() as db:
+        user = create_user(
+            db=db,
+            username="Admin",
+            password="adminer",
+            name="Админ",
+            surname="Админ",
+            email="admin@gmail.com",
+            phone="77777777777",
+            patronymic="Админ",
+            address="ул. Админов д. 999"
+        )
+        print(user)
+
+def _update_user():
+    with get_db_session() as db:
+        update_user(db=db, user_id=get_user_by_email(db=db, email="burger@gmail.com").user_id, phone="79086430688")
+
+if __name__ == "__main__":
+    _update_user()
+```
+
+`backend/utils/security.py`:
+
+```py
+# backend/utils/security.py
+from passlib.context import CryptContext
+
+# Используем pbkdf2_sha256 — не требует внешних зависимостей, нет ограничения в 72 байта
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto",
+    pbkdf2_sha256__min_rounds=100000  # Рекомендуемое количество итераций для безопасности
+)
+
+def hash_password(password: str) -> str:
+    """
+    Хеширует пароль.
+    Защита от DoS: обрезаем до 1024 символов (достаточно для любых паролей).
+    """
+    if not password or not isinstance(password, str):
+        raise ValueError("Пароль должен быть непустой строкой")
+    
+    # Защита от атак через очень длинные пароли
+    password = password[:1024]
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Проверяет пароль с той же логикой обрезки"""
+    if not plain_password or not isinstance(plain_password, str):
+        return False
+    
+    plain_password = plain_password[:1024]
+    return pwd_context.verify(plain_password, hashed_password)
+```
+
+`docker-compose.yml`:
+
+```yml
+services:
+  db:
+    image: postgres:16.2-alpine # Uses a lightweight PostgreSQL image
+    restart: always # Ensures the container restarts if it fails
+    shm_size: 128mb # Recommended for performance
+    ports:
+      - "5432:5432" # Maps the container port 5432 to the host port 5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER} # Sets the default user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Sets the password for the user
+      POSTGRES_DB: ${POSTGRES_DB} # Sets a custom default database name
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persists database data on the host
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer # Optional: A lightweight web-based DB management tool
+    restart: always
+    ports:
+      - "8080:8080" # Access via http://localhost:8080
+    depends_on:
+    - db
+  
+  backend:
+    build:
+      context: backend/
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+    depends_on:
+      - db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata:
+```
+
+`main.py`:
+
+```py
+def main():
+    print("Hello from booza-shop!")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`pyproject.toml`:
+
+```toml
+[project]
+name = "booza-shop"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.18.3",
+    "fastapi>=0.128.0",
+    "passlib[bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.11",
+    "pydantic-settings>=2.13.0",
+    "python-dotenv>=1.2.1",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.22",
+    "ruff>=0.15.0",
+    "sqlalchemy>=2.0.46",
+]
+
+```

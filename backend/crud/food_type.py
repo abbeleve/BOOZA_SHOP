@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models.setting_up_db import FoodType
+from models.setting_up_db import FoodType
 from typing import Optional, List
 
 def create_food_category(db: Session, category_id: int, name: str) -> FoodType:
