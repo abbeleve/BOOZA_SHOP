@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models.setting_up_db import Order, OrderItems, Status
+from models.setting_up_db import Order, OrderItems, Status
 from typing import Optional, List, Dict
 from datetime import datetime
 
@@ -16,7 +16,7 @@ def create_order(
     Автоматически рассчитывает total_amount на основе цен из меню на момент создания.
     """
     # Проверяем наличие пользователя
-    from backend.crud.users import get_user_by_id
+    from crud.users import get_user_by_id
     if not get_user_by_id(db, user_id):
         raise ValueError(f"Пользователь с ID {user_id} не существует")
     
@@ -24,7 +24,7 @@ def create_order(
     total_amount = 0
     validated_items = []
     
-    from backend.crud.menu_items import get_menu_item
+    from crud.menu_items import get_menu_item
     for item in items:
         menu_item = get_menu_item(db, item["menu_item_id"])
         if not menu_item:
@@ -63,7 +63,7 @@ def create_order(
     db.flush()  # Получаем order_id для элементов
     
     # Создаём элементы заказа
-    from backend.crud.order_items import create_order_item
+    from crud.order_items import create_order_item
     for item in validated_items:
         create_order_item(
             db,

@@ -1,22 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.core.security import (
+from core.security import (
     create_access_token,
     create_refresh_token,
     verify_password,
-    get_current_user
+    get_current_user,
+    decode_token
 )
-from backend.core.config import settings
-from backend.core.security import decode_token
-from backend.schemas.auth import UserRegister, UserLogin, Token, RefreshTokenRequest
-from backend.crud.users import (
+from core.config import settings
+from schemas.auth import UserRegister, UserLogin, Token, RefreshTokenRequest
+from crud.users import (
     create_user,
     get_user_by_username,
     get_user_by_email,
     get_user_by_phone
 )
-from backend.models.database import get_db
-from backend.models.setting_up_db import Users
+from models.database import get_db
+from models.setting_up_db import Users
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -41,7 +41,6 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
             email=user_data.email,
             phone=user_data.phone,
             patronymic=user_data.patronymic,
-            address=user_data.address
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

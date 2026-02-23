@@ -9,7 +9,6 @@ class UserRegister(BaseModel):
     email: EmailStr = Field(..., description="Email")
     phone: str = Field(..., min_length=10, max_length=20, description="Телефон")
     patronymic: Optional[str] = Field(None, max_length=29, description="Отчество")
-    address: Optional[str] = Field(None, max_length=255, description="Адрес")
 
     @validator('phone')
     def validate_phone_format(cls, v):

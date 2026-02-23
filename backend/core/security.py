@@ -4,11 +4,11 @@ from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from backend.core.config import settings
-from backend.models.setting_up_db import Users
-from backend.models.database import get_db
-from backend.schemas.auth import TokenData
-from backend.utils.security import verify_password  # hash_password не нужен здесь
+from core.config import settings
+from models.setting_up_db import Users
+from models.database import get_db
+from schemas.auth import TokenData
+from utils.security import verify_password  # hash_password не нужен здесь
 
 # Настройки JWT
 SECRET_KEY = settings.secret_key
@@ -78,7 +78,7 @@ async def get_current_admin(
     current_user: Users = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ) -> Users:
-    from backend.crud.staff import is_staff
+    from crud.staff import is_staff
     if not is_staff(db, current_user.username):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

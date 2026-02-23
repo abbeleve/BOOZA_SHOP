@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models.setting_up_db import MenuItems, FoodType
+from models.setting_up_db import MenuItems, FoodType
 from datetime import time
 from typing import Optional, List
 

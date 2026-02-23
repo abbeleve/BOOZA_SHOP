@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models.setting_up_db import OrderItems
+from models.setting_up_db import OrderItems
 from typing import Optional, List
 
 def create_order_item(
@@ -80,7 +80,7 @@ def delete_order_item(db: Session, order_food_id: int) -> bool:
 
 def _recalculate_order_total(db: Session, order_id: int) -> None:
     """Вспомогательная функция: пересчитывает total_amount заказа"""
-    from backend.crud.orders import get_order_by_id
+    from crud.orders import get_order_by_id
     order = get_order_by_id(db, order_id)
     if not order:
         return

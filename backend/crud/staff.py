@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models.setting_up_db import Staff, Users, Role
+from models.setting_up_db import Staff, Users, Role
 from typing import Optional, List
 from enum import Enum
 

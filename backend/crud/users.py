@@ -1,7 +1,7 @@
 import re
 from sqlalchemy.orm import Session
-from backend.models.setting_up_db import Users
-from backend.utils.security import hash_password
+from models.setting_up_db import Users
+from utils.security import hash_password
 from datetime import datetime
 
 # ======================

@@ -28,3 +28,5 @@ sqlalchemy==2.0.46
 starlette==0.50.0
 typing-extensions==4.15.0
 typing-inspection==0.4.2
+uvicorn[standard]
+pydantic[email]
