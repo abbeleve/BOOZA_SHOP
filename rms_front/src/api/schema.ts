@@ -1,9 +1,11 @@
 export type User = {
-    username: string,
-    address?: string,
-    email: string,
-    phone: string,
-}
+    id: string;
+    username: string;
+    address?: string;
+    email: string;
+    phone: string;
+    role: 'user' | 'admin' | 'staff';
+};
 
 export type MenuItem = {
     id: string,

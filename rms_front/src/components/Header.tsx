@@ -96,7 +96,7 @@ function Header({ items, phoneNumber }: HeaderProps) {
                         <div className="flex items-center gap-2 border-l border-surface-border pl-4 ml-2">
                             {user ? (
                                 <>
-                                    <span className="text-text-secondary text-sm font-main">{user.name}</span>
+                                    <span className="text-text-secondary text-sm font-main">{user.username}</span>
                                     <button onClick={logout} className="px-3 py-1.5 text-sm font-medium text-text-primary bg-surface-base hover:bg-surface-hover border border-surface-border rounded-lg transition-colors font-main">
                                         Выйти
                                     </button>

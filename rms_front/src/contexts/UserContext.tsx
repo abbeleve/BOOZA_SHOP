@@ -7,42 +7,16 @@ import {
     useCallback,
 } from 'react';
 import axios, { AxiosError } from 'axios';
+import type { User, AuthResponse, AuthContextType, RegisterRequest } from '@/api/auths/schema';
 
-
-export interface User {
-    id: number;
-    email: string;
-    name: string;
-    role: 'user' | 'admin' | 'staff';
-}
-
-export interface AuthResponse {
-    user: User;
-    access_token?: string; 
-    token?: string;        
-    token_type?: string;
-}
-
-interface UserContextType {
-    user: User | null;
-    token: string | null;
-    login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
-    logout: () => void;
-    refreshUser: () => Promise<void>;
-    isLoading: boolean;
-    error: string | null;
-    clearError: () => void;
-}
-
-const UserContext = createContext<UserContextType | undefined>(undefined);
-
+const UserContext = createContext<AuthContextType | undefined>(undefined);
 const TOKEN_KEY = 'booza_auth_token';
-const API_BASE = '/api'; 
+const API_BASE = '/api';
 
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
+// Интерцепторы (без изменений)
 axios.interceptors.request.use((config) => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
     if (storedToken && !config.headers.Authorization) {
@@ -84,9 +58,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const initAuth = async () => {
             const storedToken = localStorage.getItem(TOKEN_KEY);
-            if (storedToken) {
-                await validateToken(storedToken);
-            }
+            if (storedToken) await validateToken(storedToken);
             setIsLoading(false);
         };
         initAuth();
@@ -95,24 +67,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const login = async (email: string, password: string) => {
         setIsLoading(true);
         setError(null);
-        
         try {
-            const { data } = await axios.post<AuthResponse>('/api/auth/login', {
-                email,
-                password,
-            });
+            const { data } = await axios.post<AuthResponse>('/api/auth/login', { email, password });
+            if (!data.access_token) throw new Error('Токен не получен');
             
-            const accessToken = data.access_token || data.token;
-            
-            if (!accessToken) {
-                throw new Error('Токен не получен от сервера');
-            }
-            
-            setToken(accessToken);
+            setToken(data.access_token);
             setUser(data.user);
-            localStorage.setItem(TOKEN_KEY, accessToken);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-            
+            localStorage.setItem(TOKEN_KEY, data.access_token);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
         } catch (err: any) {
             const message = err.response?.data?.detail || err.response?.data?.message || 'Ошибка авторизации';
             setError(message);
@@ -122,28 +84,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const register = async (name: string, email: string, password: string) => {
+    const register = async (data: RegisterRequest) => {
         setIsLoading(true);
         setError(null);
-        
         try {
-            const { data } = await axios.post<AuthResponse>('/api/auth/register', {
-                name,
-                email,
-                password,
-            });
+            const { data: responseData } = await axios.post<AuthResponse>('/api/auth/register', data);
+            if (!responseData.access_token) throw new Error('Токен не получен');
             
-            const accessToken = data.access_token || data.token;
-            
-            if (!accessToken) {
-                throw new Error('Токен не получен от сервера');
-            }
-            
-            setToken(accessToken);
-            setUser(data.user);
-            localStorage.setItem(TOKEN_KEY, accessToken);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-            
+            setToken(responseData.access_token);
+            setUser(responseData.user);
+            localStorage.setItem(TOKEN_KEY, responseData.access_token);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${responseData.access_token}`;
         } catch (err: any) {
             const message = err.response?.data?.detail || err.response?.data?.message || 'Ошибка регистрации';
             setError(message);
@@ -159,11 +110,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(TOKEN_KEY);
         delete axios.defaults.headers.common['Authorization'];
     }, []);
+    
 
     const refreshUser = useCallback(async () => {
         const currentToken = localStorage.getItem(TOKEN_KEY);
         if (!currentToken) return;
-        
         try {
             const { data } = await axios.get<User>('/api/auth/me');
             setUser(data);
@@ -174,20 +125,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const clearError = useCallback(() => setError(null), []);
 
-    const value: UserContextType = {
-        user,
-        token,
-        login,
-        register,
-        logout,
-        refreshUser,
-        isLoading,
-        error,
-        clearError,
-    };
-
     return (
-        <UserContext.Provider value={value}>
+        <UserContext.Provider value={{ user, token, login, register, logout, refreshUser, isLoading, error, clearError }}>
             {children}
         </UserContext.Provider>
     );
@@ -195,8 +134,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
 export function useUser() {
     const context = useContext(UserContext);
-    if (context === undefined) {
-        throw new Error('useUser must be used within a UserProvider');
-    }
+    if (context === undefined) throw new Error('useUser must be used within a UserProvider');
     return context;
 }
