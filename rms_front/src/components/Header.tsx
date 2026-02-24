@@ -1,11 +1,11 @@
-import { type Link as NavLink } from "@/types/header";
+import { type Link as NavigationLink } from "@/types/header";
 import { Link } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import Logo from "./Logo";
 import { useCart } from "@/contexts/CartContext";
 
 interface HeaderProps {
-    items: NavLink[];
+    items: NavigationLink[];
     phoneNumber: string;
 }
 
@@ -14,7 +14,7 @@ function Header({ items, phoneNumber }: HeaderProps) {
     const { user, logout } = useUser();
 
     return (
-        <header className="flex flex-col md:flex-row md:gap-10 px-4 md:px-10 pt-5 pb-4 border-b border-surface-border">
+        <header className="flex flex-col md:flex-row md:gap-10 px-4 md:px-10 pt-5 pb-4">
             <div className="">
                 <Logo />
             </div>
@@ -81,8 +81,15 @@ function Header({ items, phoneNumber }: HeaderProps) {
                     <div className="hidden sm:flex items-center gap-4">
                         <span className="text-text-primary font-main font-medium">{phoneNumber}</span>
                         
-                        <Link to="/cart" className="relative">
-                            {/* ... иконка корзины (как выше) ... */}
+                        <Link to="/cart" className="relative p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-text-primary hover:text-accent transition-colors">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+                            {totalCount > 0 && (                    
+                                <span className="absolute -top-1.5 -right-1.5 bg-error text-text-inverse text-[10px] font-bold rounded-full min-w-[18px] h-4.5 flex items-center justify-center px-1 font-main">
+                                    {totalCount > 99 ? '99+' : totalCount}
+                                </span>
+                            )}
                         </Link>
 
                         {/* Auth блок */}
@@ -98,9 +105,6 @@ function Header({ items, phoneNumber }: HeaderProps) {
                                 <>
                                     <Link to="/login" className="px-3 py-1.5 text-sm font-medium text-text-primary bg-surface-base hover:bg-surface-hover border border-surface-border rounded-lg transition-colors font-main">
                                         Войти
-                                    </Link>
-                                    <Link to="/register" className="px-3 py-1.5 text-sm font-medium text-text-inverse bg-accent hover:bg-accent-hover rounded-lg transition-colors font-main">
-                                        Регистрация
                                     </Link>
                                 </>
                             )}
