@@ -13,7 +13,10 @@ def create_menu_item(
     is_available: bool = True,
     preparation_time: time = None
 ) -> MenuItems:
-    """Создаёт новый элемент меню"""
+    """
+    Создаёт новый элемент меню.
+    ВАЖНО: caller должен вызвать db.commit() после создания.
+    """
     db_item = MenuItems(
         food_name=food_name,
         description=description,
@@ -24,8 +27,7 @@ def create_menu_item(
         category_id=category_id
     )
     db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
+    db.flush()  # Получаем menu_id, но не коммитим
     return db_item
 
 def get_menu_items(
@@ -67,11 +69,14 @@ def update_menu_item(
     preparation_time: Optional[time] = None,
     category_id: Optional[int] = None
 ) -> Optional[MenuItems]:
-    """Обновляет элемент меню"""
+    """
+    Обновляет элемент меню.
+    ВАЖНО: caller должен вызвать db.commit() после обновления.
+    """
     item = get_menu_item(db, menu_id)
     if not item:
         return None
-    
+
     updates = {
         'food_name': food_name,
         'description': description,
@@ -81,23 +86,25 @@ def update_menu_item(
         'preparation_time': preparation_time,
         'category_id': category_id
     }
-    
+
     for field, value in updates.items():
         if value is not None:
             if field == 'price' and value <= 0:
                 raise ValueError("Цена должна быть положительной")
             setattr(item, field, value)
-    
-    db.commit()
-    db.refresh(item)
+
+    db.flush()  # Не коммитим
     return item
 
 def delete_menu_item(db: Session, menu_id: int) -> bool:
-    """Удаляет элемент меню"""
+    """
+    Удаляет элемент меню.
+    ВАЖНО: caller должен вызвать db.commit() после удаления.
+    """
     item = get_menu_item(db, menu_id)
     if not item:
         return False
-    
+
     db.delete(item)
-    db.commit()
+    db.flush()  # Не коммитим
     return True
