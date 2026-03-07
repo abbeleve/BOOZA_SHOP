@@ -56,6 +56,15 @@ axios.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
         
+        const requestUrl = originalRequest.url || '';
+        if (
+            requestUrl.includes('/auth/login') ||
+            requestUrl.includes('/auth/register') ||
+            requestUrl.includes('/auth/refresh')
+        ) {
+            return Promise.reject(error);
+        }
+        
         // Если 401 и запрос ещё не повторялся
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
