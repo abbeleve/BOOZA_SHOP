@@ -1,38 +1,58 @@
+// Пользователь (ответ от /me)
 export type User = {
-    id: string;
+    user_id: string;
     username: string;
-    address?: string;
+    name: string;
+    surname: string;
+    patronymic?: string;
     email: string;
     phone: string;
-    role: 'user' | 'admin' | 'staff';
+    address?: string;
+    is_staff: boolean;
+    role?: 'user' | 'admin' | 'staff' | null;
 };
 
+// Запрос на вход
 export interface LoginRequest {
-    email: string;
+    username: string;  //  Может быть username или email
     password: string;
 }
 
+// Запрос на регистрацию
 export interface RegisterRequest {
     username: string;
+    password: string;
+    name: string;
+    surname: string;
     email: string;
     phone: string;
-    password: string;
+    patronymic?: string;
     address?: string;
 }
 
+// Ответ авторизации
 export interface AuthResponse {
-    user: User;
     access_token: string;
-    token_type?: string;
+    refresh_token: string;
+    expires_in: number;     //  время жизни в секундах
+    // user нет в ответе — нужно отдельно запрашивать /me
 }
 
+// Запрос на refresh
+export interface RefreshTokenRequest {
+    refresh_token: string;
+}
+
+// Контекст
 export interface AuthContextType {
     user: User | null;
     token: string | null;
-    login: (email: string, password: string) => Promise<void>;
+    refreshToken: string | null;
+    login: (username: string, password: string) => Promise<void>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<void>;
+    refreshAccessToken: () => Promise<void>;
     isLoading: boolean;
     error: string | null;
     clearError: () => void;
