@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
     const apiHost = env.VITE_API_HOST || "127.0.0.1";
     const apiPort = env.VITE_API_PORT || "8000";
 
+    const apiTarget = `${apiProtocol}://${apiHost}:${apiPort}`;
+
     return {
         plugins: [tailwindcss(), react()],
         resolve: {
@@ -20,9 +22,10 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             proxy: {
-                '^/(auth|staff|menu|api)': {
-                target: `${apiProtocol}://${apiHost}:${apiPort}/`,
-                changeOrigin: true,
+                '/api': {
+                    target: apiTarget,
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/api/, ''),
                 },
             },
         },
