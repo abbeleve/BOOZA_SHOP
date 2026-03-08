@@ -1,9 +1,4 @@
-export type User = {
-    username: string,
-    address?: string,
-    email: string,
-    phone: string,
-}
+export type { User } from '@/api/auths/schema';
 
 export type MenuItem = {
     id: string,
