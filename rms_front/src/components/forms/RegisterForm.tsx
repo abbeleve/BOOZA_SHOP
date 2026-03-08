@@ -4,6 +4,15 @@ import { useUser } from '@/contexts/UserContext';
 import type { RegisterRequest } from '@/api/auths/schema';
 import { ClipLoader } from 'react-spinners';
 import { usePhoneMask } from '@/hooks/usePhoneMask';
+import { 
+    MIN_USERNAME_LENGTH,
+    MIN_NAME_LENGTH,
+    MIN_SURNAME_LENGTH,
+    MIN_PASSWORD_LENGTH,
+    MIN_PHONE_DIGITS,
+    EMAIL_REGEX,
+    ERRORS
+} from '@/constants/validation';
 
 export default function RegisterForm() {
     const [form, setForm] = useState<RegisterRequest>({
@@ -30,26 +39,26 @@ export default function RegisterForm() {
     const validate = useCallback((): boolean => {
         const newErrors: Partial<Record<keyof RegisterRequest | 'confirmPassword', string>> = {};
         
-        if (!form.username || form.username.trim().length < 3) {
-            newErrors.username = 'Username должен содержать минимум 3 символа';
+        if (!form.username || form.username.trim().length < MIN_USERNAME_LENGTH) {
+            newErrors.username = ERRORS.TOO_SHORT('Username', MIN_USERNAME_LENGTH);
         }
-        if (!form.name || form.name.trim().length < 2) {
-            newErrors.name = 'Имя должно содержать минимум 2 символа';
+        if (!form.name || form.name.trim().length < MIN_NAME_LENGTH) {
+            newErrors.name = ERRORS.TOO_SHORT('Имя', MIN_NAME_LENGTH);
         }
-        if (!form.surname || form.surname.trim().length < 2) {
-            newErrors.surname = 'Фамилия должна содержать минимум 2 символа';
+        if (!form.surname || form.surname.trim().length < MIN_SURNAME_LENGTH) {
+            newErrors.surname = ERRORS.TOO_SHORT('Фамилия', MIN_SURNAME_LENGTH);
         }
-        if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-            newErrors.email = 'Введите корректный email';
+        if (!form.email || !EMAIL_REGEX.test(form.email)) {
+            newErrors.email = ERRORS.INVALID_EMAIL;
         }
-        if (!form.phone || form.phone.replace(/\D/g, '').length < 10) {
-            newErrors.phone = 'Введите корректный номер телефона';
+        if (!form.phone || form.phone.replace(/\D/g, '').length < MIN_PHONE_DIGITS) {
+            newErrors.phone = ERRORS.INVALID_PHONE;
         }
-        if (!form.password || form.password.length < 6) {
-            newErrors.password = 'Пароль должен содержать минимум 6 символов';
+        if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
         }
         if (form.password !== confirmPassword) {
-            newErrors.confirmPassword = 'Пароли не совпадают';
+            newErrors.confirmPassword = ERRORS.PASSWORDS_MISMATCH;
         }
         
         setErrors(newErrors);

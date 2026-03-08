@@ -2,6 +2,11 @@ import { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import type { LoginRequest } from '@/api/auths/schema';
+import { 
+    MIN_USERNAME_LENGTH, 
+    MIN_PASSWORD_LENGTH, 
+    ERRORS 
+} from '@/constants/validation';
 import { ClipLoader } from 'react-spinners';
 
 export default function LoginForm() {
@@ -17,11 +22,11 @@ export default function LoginForm() {
     const validate = useCallback((): boolean => {
         const newErrors: Partial<Record<keyof LoginRequest, string>> = {};
         
-        if (!form.username || form.username.trim().length < 2) {
-            newErrors.username = 'Введите username или email';
+        if (!form.username || form.username.trim().length < MIN_USERNAME_LENGTH) {
+            newErrors.username = ERRORS.USERNAME_OR_EMAIL_REQUIRED;
         }
-        if (!form.password || form.password.length < 6) {
-            newErrors.password = 'Пароль должен содержать минимум 6 символов';
+        if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
         }
         
         setErrors(newErrors);

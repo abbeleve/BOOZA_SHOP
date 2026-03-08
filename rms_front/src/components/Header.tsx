@@ -1,4 +1,4 @@
-import { type Link as NavigationLink } from "@/types/header";
+import { type NavigationLink } from "@/types/header";
 import { Link } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import Logo from "./Logo";
