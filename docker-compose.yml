@@ -4,7 +4,7 @@ services:
     restart: always # Ensures the container restarts if it fails
     shm_size: 128mb # Recommended for performance
     ports:
-      - "5432:5432" # Maps the container port 5432 to the host port 5432
+      - "${POSTGRES_PORT}:5432" # Maps the container port 5432 to the host port 5432
     environment:
       POSTGRES_USER: ${POSTGRES_USER} # Sets the default user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Sets the password for the user
@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
+      POSTGRES_PORT: ${POSTGRES_PORT}
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
