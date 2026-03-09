@@ -1,27 +1,53 @@
+import { useState, useEffect } from 'react';
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Menu from "@/components/Menu";
-
-
-import { type Link } from "@/types/header";
-
-
-const headerItems: Link[] = [
-    {label: "Меню", link: "/"},
-    {label: "Доставка", link: "/"},
-    {label: "О нас", link: "/"},
-];
-
-const phoneNumber: string = "8 800 555-35-35";
-const mail: string = "dreamsobenatic00@mail.ru"
+import { headerItems, phoneNumber, mail } from "@/config/main";
+import { menuApi } from "@/api/menu/menu";
+import { type MenuItem } from '@/api/menu/schema';
 
 
 function MainPage() {
+    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const items = await menuApi.getMenuItems();
+                setMenuItems(items);
+
+                const uniqueCategoryNames = Array.from(
+                    new Set(items.filter(item => item.categoryName).map(item => item.categoryName!))
+                );
+                setCategories(uniqueCategoryNames);
+            } catch (error) {
+                console.error('Failed to fetch menu data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
     return (
         <div className="flex flex-col">
             <Header items={headerItems} phoneNumber={phoneNumber}/>
             <main>
-                <Menu categories={["Буузы", "Напитки", "Супы", "Салаты", "Десерты"]} loading={false} />
+                <Menu 
+                    categories={categories} 
+                    products={menuItems.map(item => ({
+                        id: item.menuId,
+                        imageUrl: item.imageUrl || '/test_food_images/booza.png',
+                        title: item.foodName,
+                        category: item.categoryName || '',
+                        description: item.description || '',
+                        price: `${item.price} ₽`,
+                    }))}
+                    loading={loading} 
+                />
             </main>
             <Footer mainLinks={headerItems} additionalLinks={[]} mail={mail} phoneNumber={phoneNumber} />
         </div>

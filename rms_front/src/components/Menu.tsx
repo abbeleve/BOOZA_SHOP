@@ -48,85 +48,19 @@ function Menu({ categories, products = [], loading }: MenuProps) {
 
             {/* Сетка продуктов */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {products.length > 0 ? (
-                    products.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            id={typeof product.id === 'string' ? parseInt(product.id) : product.id}
-                            imageUrl={product.imageUrl}
-                            title={product.title}
-                            description={product.description}
-                            price={product.price}
-                            priceValue={parsePrice(product.price)}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                    ))
-                ) : (
-                    // Заглушка для демонстрации
-                    <>
-                        <ProductCard
-                            id={1}
-                            imageUrl="/test_food_images/booza.png"
-                            title="Буузы 20 шт."
-                            description="Рыба текст Рыба текст Рыба текст Рыба текст Рыба текст"
-                            price="1000 ₽"
-                            priceValue={1000}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                        <ProductCard
-                            id={2}
-                            imageUrl="/test_food_images/booza.png"
-                            title="Очень острая американская пицца"
-                            description="Пикантная пицца с острыми специями и сыром"
-                            price="1200 ₽"
-                            priceValue={1200}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                        <ProductCard
-                            id={3}
-                            imageUrl="/test_food_images/booza.png"
-                            title="Салат Цезарь"
-                            description="Классический салат с курицей и пармезаном"
-                            price="500 ₽"
-                            priceValue={500}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                        <ProductCard
-                            id={4}
-                            imageUrl="/test_food_images/booza.png"
-                            title="Паста Карбонара"
-                            description="Итальянская паста с беконом и сыром"
-                            price="800 ₽"
-                            priceValue={800}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                        <ProductCard
-                            id={5}
-                            imageUrl="/test_food_images/booza.png"
-                            title="Суп Рамен"
-                            description="Японский суп с лапшой и мясом"
-                            price="600 ₽"
-                            priceValue={600}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                        <ProductCard
-                            id={6}
-                            imageUrl="/test_food_images/booza.png"
-                            title="Десерт Тирамису"
-                            description="Классический итальянский десерт"
-                            price="400 ₽"
-                            priceValue={400}
-                            loading={false}
-                            onAddToCart={addToCart}
-                        />
-                    </>
-                )}
+                {products.map((product) => (
+                    <ProductCard
+                        key={product.id}
+                        id={typeof product.id === 'string' ? parseInt(product.id) : product.id}
+                        imageUrl={product.imageUrl}
+                        title={product.title}
+                        description={product.description}
+                        price={product.price}
+                        priceValue={parsePrice(product.price)}
+                        loading={false}
+                        onAddToCart={addToCart}
+                    />
+                ))}
             </div>
         </section>
     );

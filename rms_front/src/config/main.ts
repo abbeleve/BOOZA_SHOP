@@ -1,7 +1,7 @@
-import { type Link } from "@/types/header";
+import { type NavigationLink } from "@/types/header";
 
 
-export const headerItems: Link[] = [
+export const headerItems: NavigationLink[] = [
     {label: "Меню", link: "/"},
     {label: "Доставка", link: "/"},
     {label: "О нас", link: "/"},

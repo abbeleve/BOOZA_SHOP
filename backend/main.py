@@ -4,9 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.endpoints import auth, staff, menu
 from models.database import engine
 
-app = FastAPI(title="BOOZA_SHOP API", version="1.0.0")
+app = FastAPI(title="BOOZA_SHOP API", 
+              version="1.0.0")
 
-# CORS middleware
+# CORS 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
