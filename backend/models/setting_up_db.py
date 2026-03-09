@@ -28,7 +28,7 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
 
     user = relationship('Users', back_populates='orders')
-    items = relationship('OrderItems', back_populates='order')
+    items = relationship('OrderItems', back_populates='order', lazy='selectin')
 
 class OrderItems(Base):
     __tablename__ = 'order_items'

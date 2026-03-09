@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Dependencies
+node_modules
+jspm_packages
+__pycache__
+*.pyc
+venv
+.venv
+.env
+
+# Build & Logs
+dist
+build
+*.log
+*.sqlite
+logs
+
+# IDE/System Files
+.vscode
+.idea
+.DS_Store
+*.swp
