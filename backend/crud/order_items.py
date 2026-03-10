@@ -12,12 +12,13 @@ def create_order_item(
     """
     Создаёт элемент заказа.
     ВАЖНО: price должен быть передан из меню на момент создания заказа!
+    ВАЖНО: caller должен вызвать db.commit() после создания.
     """
     if quantity <= 0:
         raise ValueError("Количество должно быть положительным")
     if price <= 0:
         raise ValueError("Цена должна быть положительной")
-    
+
     item = OrderItems(
         order_id=order_id,
         menu_item_id=menu_item_id,
@@ -25,8 +26,7 @@ def create_order_item(
         price=price
     )
     db.add(item)
-    db.commit()
-    db.refresh(item)
+    db.flush()  # Получаем order_food_id, но не коммитим
     return item
 
 def get_order_item(db: Session, order_food_id: int) -> Optional[OrderItems]:
@@ -45,47 +45,53 @@ def update_order_item_quantity(
     """
     Обновляет количество в элементе заказа.
     Пересчитывает total_amount заказа автоматически.
+    ВАЖНО: caller должен вызвать db.commit() после обновления.
     """
     item = get_order_item(db, order_food_id)
     if not item:
         return None
-    
+
     if new_quantity <= 0:
         raise ValueError("Новое количество должно быть положительным")
-    
+
     # Обновляем количество
-    old_quantity = item.quantity
     item.quantity = new_quantity
-    db.commit()
-    
+
     # Пересчитываем общую сумму заказа
     _recalculate_order_total(db, item.order_id)
-    
-    db.refresh(item)
+
+    db.flush()  # Не коммитим
     return item
 
 def delete_order_item(db: Session, order_food_id: int) -> bool:
-    """Удаляет элемент заказа и пересчитывает сумму заказа"""
+    """
+    Удаляет элемент заказа и пересчитывает сумму заказа.
+    ВАЖНО: caller должен вызвать db.commit() после удаления.
+    """
     item = get_order_item(db, order_food_id)
     if not item:
         return False
-    
+
     order_id = item.order_id
     db.delete(item)
-    db.commit()
-    
+
     # Пересчитываем общую сумму заказа
     _recalculate_order_total(db, order_id)
+
+    db.flush()  # Не коммитим
     return True
 
 def _recalculate_order_total(db: Session, order_id: int) -> None:
-    """Вспомогательная функция: пересчитывает total_amount заказа"""
+    """
+    Вспомогательная функция: пересчитывает total_amount заказа.
+    ВАЖНО: caller должен вызвать db.commit() после пересчёта.
+    """
     from crud.orders import get_order_by_id
     order = get_order_by_id(db, order_id)
     if not order:
         return
-    
+
     # Суммируем все элементы заказа
     new_total = sum(item.quantity * item.price for item in order.items)
     order.total_amount = new_total
-    db.commit()
+    db.flush()  # Не коммитим

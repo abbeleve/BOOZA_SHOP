@@ -14,17 +14,18 @@ def create_order(
     Создаёт заказ со всеми элементами в одной транзакции.
     items: список словарей с menu_item_id и quantity
     Автоматически рассчитывает total_amount на основе цен из меню на момент создания.
+    ВАЖНО: caller должен вызвать db.commit() после создания.
     """
     # Проверяем наличие пользователя
     from crud.users import get_user_by_id
     if not get_user_by_id(db, user_id):
         raise ValueError(f"Пользователь с ID {user_id} не существует")
-    
+
     # Проверяем и рассчитываем элементы
     total_amount = 0
     validated_items = []
-    
-    from crud.menu_items import get_menu_item
+
+    from crud.menu import get_menu_item
     for item in items:
         menu_item = get_menu_item(db, item["menu_item_id"])
         if not menu_item:
@@ -33,7 +34,7 @@ def create_order(
             raise ValueError(f"Элемент '{menu_item.food_name}' недоступен для заказа")
         if item["quantity"] <= 0:
             raise ValueError(f"Количество для '{menu_item.food_name}' должно быть > 0")
-        
+
         # Фиксируем цену на момент заказа (важно!)
         item_total = menu_item.price * item["quantity"]
         total_amount += item_total
@@ -43,13 +44,13 @@ def create_order(
             "price": menu_item.price,  # Текущая цена из меню
             "item_total": item_total
         })
-    
+
     if total_amount <= 0:
         raise ValueError("Общая сумма заказа должна быть положительной")
-    
+
     if not delivery_address or len(delivery_address.strip()) < 5:
         raise ValueError("Адрес доставки должен содержать минимум 5 символов")
-    
+
     # Создаём заказ
     order = Order(
         user_id=user_id,
@@ -61,7 +62,7 @@ def create_order(
     )
     db.add(order)
     db.flush()  # Получаем order_id для элементов
-    
+
     # Создаём элементы заказа
     from crud.order_items import create_order_item
     for item in validated_items:
@@ -73,8 +74,10 @@ def create_order(
             price=item["price"]  # Зафиксированная цена
         )
     
-    db.commit()
+    # Обновляем связь, чтобы элементы были доступны через order.items
     db.refresh(order)
+
+    # Не делаем commit здесь - это делает endpoint
     return order
 
 def get_order_by_id(db: Session, order_id: int) -> Optional[Order]:
@@ -101,25 +104,27 @@ def update_order_status(
     new_status: Status,
     end_datetime: Optional[datetime] = None
 ) -> Optional[Order]:
-    """Обновляет статус заказа и время завершения при необходимости"""
+    """
+    Обновляет статус заказа и время завершения при необходимости.
+    ВАЖНО: caller должен вызвать db.commit() после обновления.
+    """
     order = get_order_by_id(db, order_id)
     if not order:
         return None
-    
+
     # Логика переходов статусов (опционально)
     if order.status == Status.CANCELLED and new_status != Status.CANCELLED:
         raise ValueError("Отменённый заказ нельзя изменить на другой статус")
-    
+
     order.status = new_status
-    
+
     # Автоматически устанавливаем время завершения для завершённых/отменённых заказов
     if new_status in (Status.COMPLETED, Status.CANCELLED):
         order.end_datetime = end_datetime or datetime.utcnow()
     elif new_status == Status.PENDING:
         order.end_datetime = None  # Сбрасываем если вернули в ожидание
-    
-    db.commit()
-    db.refresh(order)
+
+    db.flush()  # Не коммитим
     return order
 
 def cancel_order(db: Session, order_id: int) -> Optional[Order]:
@@ -134,20 +139,21 @@ def delete_order(db: Session, order_id: int) -> bool:
     """
     Удаляет заказ и ВСЕ его элементы (каскадное удаление).
     Рекомендуется использовать только для тестов или отменённых заказов.
+    ВАЖНО: caller должен вызвать db.commit() после удаления.
     """
     order = get_order_by_id(db, order_id)
     if not order:
         return False
-    
+
     # Защита от удаления активных заказов
     if order.status not in (Status.CANCELLED, Status.PENDING):
         raise ValueError(
             f"Нельзя удалить заказ со статусом {order.status.name}. "
             "Сначала отмените заказ."
         )
-    
+
     db.delete(order)
-    db.commit()
+    db.flush()  # Не коммитим
     return True
 
 def get_order_details(db: Session, order_id: int) -> Optional[Dict]:

@@ -11,22 +11,22 @@ def create_staff(
     """
     Создаёт запись сотрудника.
     Требует: пользователь с таким username уже существует в Users.
+    ВАЖНО: caller должен вызвать db.commit() после создания.
     """
     # Проверяем существование пользователя
     user = db.query(Users).filter(Users.username == username).first()
     if not user:
         raise ValueError(f"Пользователь с username '{username}' не существует")
-    
+
     # Проверяем, не является ли пользователь уже сотрудником
     existing_staff = get_staff_by_username(db, username)
     if existing_staff:
         raise ValueError(f"Пользователь '{username}' уже является сотрудником")
-    
+
     # Создаём запись сотрудника
     staff = Staff(username=username, role=role)
     db.add(staff)
-    db.commit()
-    db.refresh(staff)
+    db.flush()  # Получаем данные, но не коммитим
     return staff
 
 def get_staff_by_username(db: Session, username: str) -> Optional[Staff]:
@@ -52,27 +52,30 @@ def update_staff_role(
     username: str,
     new_role: Role
 ) -> Optional[Staff]:
-    """Обновляет роль сотрудника"""
+    """
+    Обновляет роль сотрудника.
+    ВАЖНО: caller должен вызвать db.commit() после обновления.
+    """
     staff = get_staff_by_username(db, username)
     if not staff:
         return None
-    
+
     staff.role = new_role
-    db.commit()
-    db.refresh(staff)
+    db.flush()  # Не коммитим
     return staff
 
 def delete_staff(db: Session, username: str) -> bool:
     """
     Удаляет запись сотрудника (НЕ удаляет пользователя из Users!).
     После удаления пользователь остаётся в системе как обычный клиент.
+    ВАЖНО: caller должен вызвать db.commit() после удаления.
     """
     staff = get_staff_by_username(db, username)
     if not staff:
         return False
-    
+
     db.delete(staff)
-    db.commit()
+    db.flush()  # Не коммитим
     return True
 
 def is_staff(db: Session, username: str) -> bool:

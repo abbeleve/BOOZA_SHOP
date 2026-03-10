@@ -64,16 +64,20 @@ def create_user(
     patronymic: str = None,
     address: str = None
 ) -> Users:
+    """
+    Создаёт нового пользователя.
+    ВАЖНО: caller должен вызвать db.commit() после создания.
+    """
     # Валидация контактов ПЕРЕД созданием
     validated_email = _validate_email(email)
     normalized_phone = _normalize_phone(phone)
-    
+
     # Проверка уникальности
     if get_user_by_email(db, validated_email):
         raise ValueError(f"Email '{validated_email}' уже зарегистрирован")
     if get_user_by_phone(db, normalized_phone):
         raise ValueError(f"Телефон '{normalized_phone}' уже зарегистрирован")
-    
+
     # Хеширование пароля (уже есть в вашем коде)
     db_user = Users(
         username=username,
@@ -87,21 +91,24 @@ def create_user(
         create_datetime=datetime.utcnow()
     )
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    db.flush()  # Получаем user_id, но не коммитим
     return db_user
 
 def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
+    """
+    Обновляет пользователя.
+    ВАЖНО: caller должен вызвать db.commit() после обновления.
+    """
     user = db.query(Users).filter(Users.user_id == user_id).first()
     if not user:
         return None
-    
+
     allowed_fields = {'name', 'surname', 'patronymic', 'address', 'phone', 'email'}
-    
+
     for key, value in kwargs.items():
         if key not in allowed_fields or value is None:
             continue
-        
+
         # Специальная валидация для контактов
         if key == 'email':
             value = _validate_email(value)
@@ -112,7 +119,7 @@ def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
             ).first()
             if existing:
                 raise ValueError(f"Email '{value}' уже используется другим пользователем")
-        
+
         elif key == 'phone':
             value = _normalize_phone(value)
             # Проверка уникальности
@@ -122,11 +129,10 @@ def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
             ).first()
             if existing:
                 raise ValueError(f"Телефон '{value}' уже используется другим пользователем")
-        
+
         setattr(user, key, value)
-    
-    db.commit()
-    db.refresh(user)
+
+    db.flush()  # Не коммитим
     return user
 
 # ======================
@@ -135,6 +141,10 @@ def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
 
 def get_user_by_username(db: Session, username: str) -> Users | None:
     return db.query(Users).filter(Users.username == username).first()
+
+def get_user_by_id(db: Session, user_id: int) -> Users | None:
+    """Получает пользователя по ID"""
+    return db.query(Users).filter(Users.user_id == user_id).first()
 
 def get_user_by_phone(db: Session, phone: str) -> Users | None:
     """Получает пользователя по НОРМАЛИЗОВАННОМУ телефону"""
@@ -157,10 +167,13 @@ def search_users_by_contact(db: Session, query: str) -> list[Users]:
     ).all()
 
 def delete_user(db: Session, user_id: int) -> bool:
-    """Удаляет пользователя"""
+    """
+    Удаляет пользователя.
+    ВАЖНО: caller должен вызвать db.commit() после удаления.
+    """
     user = db.query(Users).filter(Users.user_id == user_id).first()
     if user:
         db.delete(user)
-        db.commit()
+        db.flush()  # Не коммитим
         return True
     return False
