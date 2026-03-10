@@ -1,6 +1,6 @@
 function Logo() {
     return (
-        <h1 className="text-center">Бууза</h1>
+        <h1 className="text-center align-middle">Бууза</h1>
     );
 }
 
