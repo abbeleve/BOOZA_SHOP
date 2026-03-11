@@ -518,26 +518,71 @@ def seed_orders(session):
     session.flush()
 
 
+def reset_sequences(session):
+    """
+    Сбрасывает PostgreSQL sequences после заполнения данными.
+    Нужно чтобы автоинкремент работал корректно при создании новых записей.
+    """
+    from sqlalchemy import text
+    
+    print("\n🔄 Сброс последовательностей (sequences)...")
+    
+    sequences = [
+        ("food_type", "category_id", "food_type_category_id_seq"),
+        ("menu_items", "menu_id", "menu_items_menu_id_seq"),
+        ("users", "user_id", "users_user_id_seq"),
+        ("staff", "username", None),  # У staff primary key это username (string)
+        ("orders", "order_id", "orders_order_id_seq"),
+        ("order_items", "order_food_id", "order_items_order_food_id_seq"),
+    ]
+    
+    for table, id_col, seq_name in sequences:
+        if seq_name is None:
+            print(f"   ⏭️  {table}: пропускаем (string primary key)")
+            continue
+        
+        try:
+            # Получаем максимальное значение ID
+            max_result = session.execute(
+                text(f"SELECT COALESCE(MAX({id_col}), 0) FROM {table}")
+            ).scalar()
+            
+            next_val = int(max_result) + 1
+            
+            # Обновляем sequence
+            session.execute(
+                text(f"SELECT setval('{seq_name}', {next_val})")
+            )
+            
+            print(f"   ✅ {table}: setval = {next_val}")
+        except Exception as e:
+            print(f"   ⚠️  {table}: ошибка - {e}")
+
+
 def main():
     load_dotenv()
-    
+
     print("=" * 50)
     print("🌱 Seed DB - Заполнение базы данных")
     print("=" * 50)
-    
+
     try:
         with get_db_session() as session:
             seed_food_types(session)
             seed_menu_items(session)
             seed_users(session)
             seed_orders(session)
-            
+
             session.commit()
-            
+
+            # Сбрасываем sequences после коммита (всегда, даже если данные уже были)
+            reset_sequences(session)
+            session.commit()  # Коммитим reset_sequences!
+
             print("\n" + "=" * 50)
             print("✅ База данных успешно заполнена!")
             print("=" * 50)
-            
+
             # Вывод статистики
             print("\n📊 Статистика:")
             print(f"   Категорий: {session.query(FoodType).count()}")
@@ -545,7 +590,7 @@ def main():
             print(f"   Пользователей: {session.query(Users).count()}")
             print(f"   Сотрудников: {session.query(Staff).count()}")
             print(f"   Заказов: {session.query(Order).count()}")
-            
+
             print("\n🔐 Тестовые учётные данные:")
             print("   👨‍💼 Admin: admin / admin123")
             print("   👨‍💼 Waiter: waiter_anna / waiter123")
@@ -555,7 +600,7 @@ def main():
             print("   👤 Customer 3: customer3 / user123")
             print("   👤 Customer 4: customer4 / user123")
             print("   👤 Customer 5: customer5 / user123")
-            
+
     except Exception as e:
         print(f"\n❌ Ошибка: {e}")
         raise

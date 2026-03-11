@@ -28,3 +28,6 @@ logs
 .idea
 .DS_Store
 *.swp
+
+static/images/*
+!static/images/.gitkeep
