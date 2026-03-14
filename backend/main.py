@@ -1,10 +1,15 @@
 # backend/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from api.endpoints import auth, staff, menu, food_type, order
 from models.database import engine
 
 app = FastAPI(title="BOOZA_SHOP API", version="1.0.0")
+
+# Монтируем папку со статикой (изображения блюд)
+# Доступ к изображениям: http://localhost:8000/static/images/...
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Роутеры
 app.include_router(auth.router)
