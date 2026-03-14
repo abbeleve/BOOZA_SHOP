@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 # Добавляем backend в path (для запуска из контейнера)
 sys.path.insert(0, '/app')
+sys.path.append("..")
 
 from models.database import get_db_session, engine
 from models.setting_up_db import Base, FoodType, MenuItems, Users, Staff, Role, Status, Order

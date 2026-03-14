@@ -19,7 +19,7 @@ function MainPage() {
                 setMenuItems(items);
 
                 const uniqueCategoryNames = Array.from(
-                    new Set(items.filter(item => item.categoryName).map(item => item.categoryName!))
+                    new Set(items.filter(item => item.category_name).map(item => item.category_name!))
                 );
                 setCategories(uniqueCategoryNames);
             } catch (error) {
@@ -39,10 +39,10 @@ function MainPage() {
                 <Menu 
                     categories={categories} 
                     products={menuItems.map(item => ({
-                        id: item.menuId,
-                        imageUrl: item.imageUrl || '/test_food_images/booza.png',
-                        title: item.foodName,
-                        category: item.categoryName || '',
+                        id: item.menu_id,
+                        imageUrl: item.image_url || '/test_food_images/booza.png',
+                        title: item.food_name,
+                        category: item.category_name || '',
                         description: item.description || '',
                         price: `${item.price} ₽`,
                     }))}

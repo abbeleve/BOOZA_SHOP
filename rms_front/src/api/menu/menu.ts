@@ -10,7 +10,7 @@ export const menuApi = {
         const response = await apiClient.get<MenuItem[]>('/api/menu', { params });
         return response.data;
     },
-    
+
     createMenuItem: async (item: {
         food_name: string;
         price: number;
@@ -20,10 +20,10 @@ export const menuApi = {
         is_available?: boolean;
         preparation_time_minutes?: number;
     }): Promise<MenuItem> => {
-        const response = await apiClient.post<MenuItem>('/api/menu', item);
+        const response = await apiClient.post<MenuItem>('/api/menu', item)
         return response.data;
     },
-    
+
     deleteMenuItem: async (menuId: number): Promise<void> => {
         await apiClient.delete(`/api/menu/${menuId}`);
     },
@@ -31,7 +31,7 @@ export const menuApi = {
 
 export const categoriesApi = {
     getCategories: async (): Promise<Category[]> => {
-        const response = await apiClient.get<Category[]>('/api/categories');
+        const response = await apiClient.get<Category[]>('/api/food-type');
         return response.data;
     },
 };

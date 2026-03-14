@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { menuApi, categoriesApi } from '@/api/menu/menu';
 import { type Category } from '@/api/menu/schema';
 
@@ -31,11 +31,11 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
         }
     };
 
-    const handleOpenChange = (open: boolean) => {
-        if (open) {
+    useEffect(() => {
+        if (isOpen) {
             loadCategories();
         }
-    };
+    }, [isOpen]);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -158,7 +158,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
                                 >
                                     <option value="">Выберите</option>
                                     {categories.map((cat) => (
-                                        <option key={cat.categoryId} value={cat.categoryId}>
+                                        <option key={cat.category_id} value={cat.category_id}>
                                             {cat.name}
                                         </option>
                                     ))}

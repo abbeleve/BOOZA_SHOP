@@ -100,11 +100,11 @@ function MenuControlPage() {
 
                             {/* Existing Products */}
                             {menuItems.map((item) => (
-                                <div key={item.menuId} className="min-h-[200px]">
+                                <div key={item.menu_id} className="min-h-[200px]">
                                     <AdminProductCard
-                                        id={item.menuId}
+                                        id={item.menu_id}
                                         imageUrl={item.imageUrl || '/test_food_images/booza.png'}
-                                        title={item.foodName}
+                                        title={item.food_name}
                                         description={item.description || ''}
                                         price={`${item.price} ₽`}
                                         categoryName={item.categoryName}
