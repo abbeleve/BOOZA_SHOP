@@ -52,76 +52,76 @@ def seed_menu_items(session):
 
     menu_items = [
         # ==================== ПИЦЦА (1) ====================
-        {"menu_id": 1, "food_name": "Маргарита", "description": "Классическая пицца с томатным соусом и моцареллой", "price": 450, "category_id": 1, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/margarita.jpg"},
-        {"menu_id": 2, "food_name": "Пепперони", "description": "Пицца с пикантной пепперони и сыром моцарелла", "price": 550, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/pepperoni.jpg"},
-        {"menu_id": 3, "food_name": "Четыре сыра", "description": "Пицца с моцареллой, пармезаном, горгонзолой и чеддером", "price": 650, "category_id": 1, "preparation_time": time(0, 20), "is_available": True, "image_url": "/images/four_cheese.jpg"},
-        {"menu_id": 13, "food_name": "Диабло", "description": "Острая пицца с халапеньо и чоризо", "price": 590, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/diablo.jpg"},
-        {"menu_id": 14, "food_name": "Гавайская", "description": "Пицца с ветчиной и ананасами", "price": 520, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/hawaii.jpg"},
-        {"menu_id": 15, "food_name": "Мясная", "description": "Пицца с ветчиной, пепперони, колбасками и беконом", "price": 750, "category_id": 1, "preparation_time": time(0, 20), "is_available": True, "image_url": "/images/meat.jpg"},
-        {"menu_id": 16, "food_name": "Вегетарианская", "description": "Пицца с грибами, перцем, оливками и томатами", "price": 490, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/veggie.jpg"},
-        {"menu_id": 17, "food_name": "Карбонара", "description": "Пицца с беконом, сливочным соусом и яйцом", "price": 580, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/carbonara.jpg"},
+        {"menu_id": 1, "food_name": "Маргарита", "description": "Классическая пицца с томатным соусом и моцареллой", "price": 450, "category_id": 1, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/pizza/margarita.jpg"},
+        {"menu_id": 2, "food_name": "Пепперони", "description": "Пицца с пикантной пепперони и сыром моцарелла", "price": 550, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/pizza/pepperoni.jpg"},
+        {"menu_id": 3, "food_name": "Четыре сыра", "description": "Пицца с моцареллой, пармезаном, горгонзолой и чеддером", "price": 650, "category_id": 1, "preparation_time": time(0, 20), "is_available": True, "image_url": "/static/images/pizza/four_cheese.jpg"},
+        {"menu_id": 13, "food_name": "Диабло", "description": "Острая пицца с халапеньо и чоризо", "price": 590, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/pizza/diablo.jpg"},
+        {"menu_id": 14, "food_name": "Гавайская", "description": "Пицца с ветчиной и ананасами", "price": 520, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/pizza/hawaii.jpg"},
+        {"menu_id": 15, "food_name": "Мясная", "description": "Пицца с ветчиной, пепперони, колбасками и беконом", "price": 750, "category_id": 1, "preparation_time": time(0, 20), "is_available": True, "image_url": "/static/images/pizza/meat.jpg"},
+        {"menu_id": 16, "food_name": "Вегетарианская", "description": "Пицца с грибами, перцем, оливками и томатами", "price": 490, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/pizza/veggie.jpg"},
+        {"menu_id": 17, "food_name": "Карбонара", "description": "Пицца с беконом, сливочным соусом и яйцом", "price": 580, "category_id": 1, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/pizza/carbonara.jpg"},
         
         # ==================== СУШИ (2) ====================
-        {"menu_id": 4, "food_name": "Филадельфия", "description": "Ролл с лососем, сливочным сыром и огурцом", "price": 520, "category_id": 2, "preparation_time": time(0, 12), "is_available": True, "image_url": "/images/philadelphia.jpg"},
-        {"menu_id": 5, "food_name": "Калифорния", "description": "Ролл с крабом, авокадо и икрой тобико", "price": 480, "category_id": 2, "preparation_time": time(0, 12), "is_available": True, "image_url": "/images/california.jpg"},
-        {"menu_id": 6, "food_name": "Дракон", "description": "Запеченный ролл с угрем и сливочным сыром", "price": 590, "category_id": 2, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/dragon.jpg"},
-        {"menu_id": 18, "food_name": "Маки с лососем", "description": "Классический ролл с лососем", "price": 320, "category_id": 2, "preparation_time": time(0, 10), "is_available": True, "image_url": "/images/salmon_maki.jpg"},
-        {"menu_id": 19, "food_name": "Маки с огурцом", "description": "Классический ролл с огурцом", "price": 250, "category_id": 2, "preparation_time": time(0, 10), "is_available": True, "image_url": "/images/cucumber_maki.jpg"},
-        {"menu_id": 20, "food_name": "Темпура ролл", "description": "Запеченный ролл с креветкой в темпуре", "price": 540, "category_id": 2, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/tempura.jpg"},
-        {"menu_id": 21, "food_name": "Сет Филадельфия", "description": "Набор: Филадельфия, Калифорния, Маки (32 шт)", "price": 1490, "category_id": 2, "preparation_time": time(0, 20), "is_available": True, "image_url": "/images/philadelphia_set.jpg"},
+        {"menu_id": 4, "food_name": "Филадельфия", "description": "Ролл с лососем, сливочным сыром и огурцом", "price": 520, "category_id": 2, "preparation_time": time(0, 12), "is_available": True, "image_url": "/static/images/sushi/philadelphia.jpg"},
+        {"menu_id": 5, "food_name": "Калифорния", "description": "Ролл с крабом, авокадо и икрой тобико", "price": 480, "category_id": 2, "preparation_time": time(0, 12), "is_available": True, "image_url": "/static/images/sushi/california.jpg"},
+        {"menu_id": 6, "food_name": "Дракон", "description": "Запеченный ролл с угрем и сливочным сыром", "price": 590, "category_id": 2, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/sushi/dragon.jpg"},
+        {"menu_id": 18, "food_name": "Маки с лососем", "description": "Классический ролл с лососем", "price": 320, "category_id": 2, "preparation_time": time(0, 10), "is_available": True, "image_url": "/static/images/sushi/salmon_maki.jpg"},
+        {"menu_id": 19, "food_name": "Маки с огурцом", "description": "Классический ролл с огурцом", "price": 250, "category_id": 2, "preparation_time": time(0, 10), "is_available": True, "image_url": "/static/images/sushi/cucumber_maki.jpg"},
+        {"menu_id": 20, "food_name": "Темпура ролл", "description": "Запеченный ролл с креветкой в темпуре", "price": 540, "category_id": 2, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/sushi/tempura.jpg"},
+        {"menu_id": 21, "food_name": "Сет Филадельфия", "description": "Набор: Филадельфия, Калифорния, Маки (32 шт)", "price": 1490, "category_id": 2, "preparation_time": time(0, 20), "is_available": True, "image_url": "/static/images/sushi/philadelphia_set.jpg"},
         
         # ==================== НАПИТКИ (3) ====================
-        {"menu_id": 7, "food_name": "Coca-Cola", "description": "Газированный напиток, 0.5л", "price": 120, "category_id": 3, "preparation_time": time(0, 1), "is_available": True, "image_url": "/images/coca_cola.jpg"},
-        {"menu_id": 8, "food_name": "Апельсиновый сок", "description": "Свежевыжатый сок, 0.3л", "price": 250, "category_id": 3, "preparation_time": time(0, 3), "is_available": True, "image_url": "/images/orange_juice.jpg"},
-        {"menu_id": 22, "food_name": "Pepsi", "description": "Газированный напиток, 0.5л", "price": 120, "category_id": 3, "preparation_time": time(0, 1), "is_available": True, "image_url": "/images/pepsi.jpg"},
-        {"menu_id": 23, "food_name": "Зелёный чай", "description": "Классический зелёный чай, 0.3л", "price": 150, "category_id": 3, "preparation_time": time(0, 5), "is_available": True, "image_url": "/images/green_tea.jpg"},
-        {"menu_id": 24, "food_name": "Кофе Латте", "description": "Кофе с молоком, 0.3л", "price": 220, "category_id": 3, "preparation_time": time(0, 5), "is_available": True, "image_url": "/images/latte.jpg"},
-        {"menu_id": 25, "food_name": "Лимонад Домашний", "description": "Домашний лимонад, 0.5л", "price": 280, "category_id": 3, "preparation_time": time(0, 3), "is_available": True, "image_url": "/images/lemonade.jpg"},
+        {"menu_id": 7, "food_name": "Coca-Cola", "description": "Газированный напиток, 0.5л", "price": 120, "category_id": 3, "preparation_time": time(0, 1), "is_available": True, "image_url": "/static/images/drinks/coca_cola.jpg"},
+        {"menu_id": 8, "food_name": "Апельсиновый сок", "description": "Свежевыжатый сок, 0.3л", "price": 250, "category_id": 3, "preparation_time": time(0, 3), "is_available": True, "image_url": "/static/images/drinks/orange_juice.jpg"},
+        {"menu_id": 22, "food_name": "Pepsi", "description": "Газированный напиток, 0.5л", "price": 120, "category_id": 3, "preparation_time": time(0, 1), "is_available": True, "image_url": "/static/images/drinks/pepsi.jpg"},
+        {"menu_id": 23, "food_name": "Зелёный чай", "description": "Классический зелёный чай, 0.3л", "price": 150, "category_id": 3, "preparation_time": time(0, 5), "is_available": True, "image_url": "/static/images/drinks/green_tea.jpg"},
+        {"menu_id": 24, "food_name": "Кофе Латте", "description": "Кофе с молоком, 0.3л", "price": 220, "category_id": 3, "preparation_time": time(0, 5), "is_available": True, "image_url": "/static/images/drinks/latte.jpg"},
+        {"menu_id": 25, "food_name": "Лимонад Домашний", "description": "Домашний лимонад, 0.5л", "price": 280, "category_id": 3, "preparation_time": time(0, 3), "is_available": True, "image_url": "/static/images/drinks/lemonade.jpg"},
         
         # ==================== ЗАКУСКИ (4) ====================
-        {"menu_id": 9, "food_name": "Картофель фри", "description": "Хрустящий картофель во фритюре", "price": 180, "category_id": 4, "preparation_time": time(0, 10), "is_available": True, "image_url": "/images/fries.jpg"},
-        {"menu_id": 10, "food_name": "Луковые кольца", "description": "Жареные луковые кольца в кляре", "price": 200, "category_id": 4, "preparation_time": time(0, 10), "is_available": True, "image_url": "/images/onion_rings.jpg"},
-        {"menu_id": 26, "food_name": "Наггетсы", "description": "Куриные наггетсы, 6 шт", "price": 290, "category_id": 4, "preparation_time": time(0, 12), "is_available": True, "image_url": "/images/nuggets.jpg"},
-        {"menu_id": 27, "food_name": "Крылышки BBQ", "description": "Куриные крылышки в соусе барбекю", "price": 350, "category_id": 4, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/wings.jpg"},
-        {"menu_id": 28, "food_name": "Сыр моцарелла в панировке", "description": "Запеченная моцарелла в сухарях, 6 шт", "price": 320, "category_id": 4, "preparation_time": time(0, 10), "is_available": True, "image_url": "/images/mozzarella_sticks.jpg"},
-        {"menu_id": 29, "food_name": "Гренки чесночные", "description": "Гренки из чёрного хлеба с чесноком", "price": 190, "category_id": 4, "preparation_time": time(0, 8), "is_available": True, "image_url": "/images/croutons.jpg"},
+        {"menu_id": 9, "food_name": "Картофель фри", "description": "Хрустящий картофель во фритюре", "price": 180, "category_id": 4, "preparation_time": time(0, 10), "is_available": True, "image_url": "/static/images/snacks/fries.jpg"},
+        {"menu_id": 10, "food_name": "Луковые кольца", "description": "Жареные луковые кольца в кляре", "price": 200, "category_id": 4, "preparation_time": time(0, 10), "is_available": True, "image_url": "/static/images/snacks/onion_rings.jpg"},
+        {"menu_id": 26, "food_name": "Наггетсы", "description": "Куриные наггетсы, 6 шт", "price": 290, "category_id": 4, "preparation_time": time(0, 12), "is_available": True, "image_url": "/static/images/snacks/nuggets.jpg"},
+        {"menu_id": 27, "food_name": "Крылышки BBQ", "description": "Куриные крылышки в соусе барбекю", "price": 350, "category_id": 4, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/snacks/wings.jpg"},
+        {"menu_id": 28, "food_name": "Сыр моцарелла в панировке", "description": "Запеченная моцарелла в сухарях, 6 шт", "price": 320, "category_id": 4, "preparation_time": time(0, 10), "is_available": True, "image_url": "/static/images/snacks/mozzarella_sticks.jpg"},
+        {"menu_id": 29, "food_name": "Гренки чесночные", "description": "Гренки из чёрного хлеба с чесноком", "price": 190, "category_id": 4, "preparation_time": time(0, 8), "is_available": True, "image_url": "/static/images/snacks/croutons.jpg"},
         
         # ==================== ДЕСЕРТЫ (5) ====================
-        {"menu_id": 11, "food_name": "Тирамису", "description": "Классический итальянский десерт", "price": 320, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/images/tiramisu.jpg"},
-        {"menu_id": 12, "food_name": "Чизкейк Нью-Йорк", "description": "Классический чизкейк с клубничным соусом", "price": 350, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/images/cheesecake.jpg"},
-        {"menu_id": 30, "food_name": "Панна Котта", "description": "Итальянский десерт с малиновым соусом", "price": 310, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/images/panna_cotta.jpg"},
-        {"menu_id": 31, "food_name": "Брауни", "description": "Шоколадный кекс с шариком мороженого", "price": 290, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/images/brownie.jpg"},
-        {"menu_id": 32, "food_name": "Мороженое", "description": "Шарики мороженого (3 шт), разные вкусы", "price": 250, "category_id": 5, "preparation_time": time(0, 3), "is_available": True, "image_url": "/images/ice_cream.jpg"},
+        {"menu_id": 11, "food_name": "Тирамису", "description": "Классический итальянский десерт", "price": 320, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/static/images/desserts/tiramisu.jpg"},
+        {"menu_id": 12, "food_name": "Чизкейк Нью-Йорк", "description": "Классический чизкейк с клубничным соусом", "price": 350, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/static/images/desserts/cheesecake.jpg"},
+        {"menu_id": 30, "food_name": "Панна Котта", "description": "Итальянский десерт с малиновым соусом", "price": 310, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/static/images/desserts/panna_cotta.jpg"},
+        {"menu_id": 31, "food_name": "Брауни", "description": "Шоколадный кекс с шариком мороженого", "price": 290, "category_id": 5, "preparation_time": time(0, 5), "is_available": True, "image_url": "/static/images/desserts/brownie.jpg"},
+        {"menu_id": 32, "food_name": "Мороженое", "description": "Шарики мороженого (3 шт), разные вкусы", "price": 250, "category_id": 5, "preparation_time": time(0, 3), "is_available": True, "image_url": "/static/images/desserts/ice_cream.jpg"},
         
         # ==================== САЛАТЫ (6) ====================
-        {"menu_id": 33, "food_name": "Цезарь с курицей", "description": "Салат с курицей, пармезаном и сухариками", "price": 420, "category_id": 6, "preparation_time": time(0, 12), "is_available": True, "image_url": "/images/caesar_chicken.jpg"},
-        {"menu_id": 34, "food_name": "Цезарь с креветками", "description": "Салат с тигровыми креветками", "price": 520, "category_id": 6, "preparation_time": time(0, 12), "is_available": True, "image_url": "/images/caesar_shrimp.jpg"},
-        {"menu_id": 35, "food_name": "Греческий", "description": "Классический греческий салат с фетой", "price": 380, "category_id": 6, "preparation_time": time(0, 10), "is_available": True, "image_url": "/images/greek.jpg"},
-        {"menu_id": 36, "food_name": "Капрезе", "description": "Салат с моцареллой, томатами и базиликом", "price": 390, "category_id": 6, "preparation_time": time(0, 8), "is_available": True, "image_url": "/images/caprese.jpg"},
+        {"menu_id": 33, "food_name": "Цезарь с курицей", "description": "Салат с курицей, пармезаном и сухариками", "price": 420, "category_id": 6, "preparation_time": time(0, 12), "is_available": True, "image_url": "/static/images/salads/caesar_chicken.jpg"},
+        {"menu_id": 34, "food_name": "Цезарь с креветками", "description": "Салат с тигровыми креветками", "price": 520, "category_id": 6, "preparation_time": time(0, 12), "is_available": True, "image_url": "/static/images/salads/caesar_shrimp.jpg"},
+        {"menu_id": 35, "food_name": "Греческий", "description": "Классический греческий салат с фетой", "price": 380, "category_id": 6, "preparation_time": time(0, 10), "is_available": True, "image_url": "/static/images/salads/greek.jpg"},
+        {"menu_id": 36, "food_name": "Капрезе", "description": "Салат с моцареллой, томатами и базиликом", "price": 390, "category_id": 6, "preparation_time": time(0, 8), "is_available": True, "image_url": "/static/images/salads/caprese.jpg"},
         
         # ==================== СУПЫ (7) ====================
-        {"menu_id": 37, "food_name": "Борщ", "description": "Классический борщ со сметаной", "price": 320, "category_id": 7, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/borscht.jpg"},
-        {"menu_id": 38, "food_name": "Солянка", "description": "Мясная солянка сборная", "price": 380, "category_id": 7, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/solyanka.jpg"},
-        {"menu_id": 39, "food_name": "Куриный суп", "description": "Лёгкий куриный суп с лапшой", "price": 280, "category_id": 7, "preparation_time": time(0, 12), "is_available": True, "image_url": "/images/chicken_soup.jpg"},
-        {"menu_id": 40, "food_name": "Том Ям", "description": "Острый тайский суп с креветками", "price": 450, "category_id": 7, "preparation_time": time(0, 20), "is_available": True, "image_url": "/images/tom_yam.jpg"},
+        {"menu_id": 37, "food_name": "Борщ", "description": "Классический борщ со сметаной", "price": 320, "category_id": 7, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/soups/borscht.jpg"},
+        {"menu_id": 38, "food_name": "Солянка", "description": "Мясная солянка сборная", "price": 380, "category_id": 7, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/soups/solyanka.jpg"},
+        {"menu_id": 39, "food_name": "Куриный суп", "description": "Лёгкий куриный суп с лапшой", "price": 280, "category_id": 7, "preparation_time": time(0, 12), "is_available": True, "image_url": "/static/images/soups/chicken_soup.jpg"},
+        {"menu_id": 40, "food_name": "Том Ям", "description": "Острый тайский суп с креветками", "price": 450, "category_id": 7, "preparation_time": time(0, 20), "is_available": True, "image_url": "/static/images/soups/tom_yam.jpg"},
         
         # ==================== ГОРЯЧЕЕ (8) ====================
-        {"menu_id": 41, "food_name": "Стейк Рибай", "description": "Стейк из мраморной говядины, 300г", "price": 1290, "category_id": 8, "preparation_time": time(0, 25), "is_available": True, "image_url": "/images/ribeye.jpg"},
-        {"menu_id": 42, "food_name": "Лосось на гриле", "description": "Филе лосося с овощами", "price": 890, "category_id": 8, "preparation_time": time(0, 20), "is_available": True, "image_url": "/images/salmon_grill.jpg"},
-        {"menu_id": 43, "food_name": "Куриная грудка", "description": "Грудка на гриле с картофельным пюре", "price": 450, "category_id": 8, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/chicken_breast.jpg"},
-        {"menu_id": 44, "food_name": "Свиные рёбрышки", "description": "Рёбрышки BBQ с картофелем", "price": 690, "category_id": 8, "preparation_time": time(0, 25), "is_available": True, "image_url": "/images/ribs.jpg"},
+        {"menu_id": 41, "food_name": "Стейк Рибай", "description": "Стейк из мраморной говядины, 300г", "price": 1290, "category_id": 8, "preparation_time": time(0, 25), "is_available": True, "image_url": "/static/images/hot/ribeye.jpg"},
+        {"menu_id": 42, "food_name": "Лосось на гриле", "description": "Филе лосося с овощами", "price": 890, "category_id": 8, "preparation_time": time(0, 20), "is_available": True, "image_url": "/static/images/hot/salmon_grill.jpg"},
+        {"menu_id": 43, "food_name": "Куриная грудка", "description": "Грудка на гриле с картофельным пюре", "price": 450, "category_id": 8, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/hot/chicken_breast.jpg"},
+        {"menu_id": 44, "food_name": "Свиные рёбрышки", "description": "Рёбрышки BBQ с картофелем", "price": 690, "category_id": 8, "preparation_time": time(0, 25), "is_available": True, "image_url": "/static/images/hot/ribs.jpg"},
         
         # ==================== ПАСТА (9) ====================
-        {"menu_id": 45, "food_name": "Паста Карбонара", "description": "Классическая карбонара с гуанчиале", "price": 480, "category_id": 9, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/carbonara_pasta.jpg"},
-        {"menu_id": 46, "food_name": "Паста Болоньезе", "description": "Тальятелле с мясным соусом", "price": 450, "category_id": 9, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/bolognese.jpg"},
-        {"menu_id": 47, "food_name": "Паста Альфредо", "description": "Феттучине со сливочным соусом и курицей", "price": 470, "category_id": 9, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/alfredo.jpg"},
-        {"menu_id": 48, "food_name": "Паста с морепродуктами", "description": "Спагетти с миксом морепродуктов", "price": 590, "category_id": 9, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/seafood_pasta.jpg"},
+        {"menu_id": 45, "food_name": "Паста Карбонара", "description": "Классическая карбонара с гуанчиале", "price": 480, "category_id": 9, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/pasta/carbonara_pasta.jpg"},
+        {"menu_id": 46, "food_name": "Паста Болоньезе", "description": "Тальятелле с мясным соусом", "price": 450, "category_id": 9, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/pasta/bolognese.jpg"},
+        {"menu_id": 47, "food_name": "Паста Альфредо", "description": "Феттучине со сливочным соусом и курицей", "price": 470, "category_id": 9, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/pasta/alfredo.jpg"},
+        {"menu_id": 48, "food_name": "Паста с морепродуктами", "description": "Спагетти с миксом морепродуктов", "price": 590, "category_id": 9, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/pasta/seafood_pasta.jpg"},
         
         # ==================== БУРГЕРЫ (10) ====================
-        {"menu_id": 49, "food_name": "Чизбургер", "description": "Классический бургер с сыром чеддер", "price": 420, "category_id": 10, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/cheeseburger.jpg"},
-        {"menu_id": 50, "food_name": "Двойной бургер", "description": "Бургер с двумя котлетами", "price": 550, "category_id": 10, "preparation_time": time(0, 18), "is_available": True, "image_url": "/images/double_burger.jpg"},
-        {"menu_id": 51, "food_name": "Чикенбургер", "description": "Бургер с куриной котлетой", "price": 390, "category_id": 10, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/chicken_burger.jpg"},
-        {"menu_id": 52, "food_name": "Вегги бургер", "description": "Бургер с овощной котлетой", "price": 380, "category_id": 10, "preparation_time": time(0, 15), "is_available": True, "image_url": "/images/veggie_burger.jpg"},
+        {"menu_id": 49, "food_name": "Чизбургер", "description": "Классический бургер с сыром чеддер", "price": 420, "category_id": 10, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/burgers/cheeseburger.jpg"},
+        {"menu_id": 50, "food_name": "Двойной бургер", "description": "Бургер с двумя котлетами", "price": 550, "category_id": 10, "preparation_time": time(0, 18), "is_available": True, "image_url": "/static/images/burgers/double_burger.jpg"},
+        {"menu_id": 51, "food_name": "Чикенбургер", "description": "Бургер с куриной котлетой", "price": 390, "category_id": 10, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/burgers/chicken_burger.jpg"},
+        {"menu_id": 52, "food_name": "Вегги бургер", "description": "Бургер с овощной котлетой", "price": 380, "category_id": 10, "preparation_time": time(0, 15), "is_available": True, "image_url": "/static/images/burgers/veggie_burger.jpg"},
     ]
 
     for item in menu_items:
@@ -519,26 +519,71 @@ def seed_orders(session):
     session.flush()
 
 
+def reset_sequences(session):
+    """
+    Сбрасывает PostgreSQL sequences после заполнения данными.
+    Нужно чтобы автоинкремент работал корректно при создании новых записей.
+    """
+    from sqlalchemy import text
+    
+    print("\n🔄 Сброс последовательностей (sequences)...")
+    
+    sequences = [
+        ("food_type", "category_id", "food_type_category_id_seq"),
+        ("menu_items", "menu_id", "menu_items_menu_id_seq"),
+        ("users", "user_id", "users_user_id_seq"),
+        ("staff", "username", None),  # У staff primary key это username (string)
+        ("orders", "order_id", "orders_order_id_seq"),
+        ("order_items", "order_food_id", "order_items_order_food_id_seq"),
+    ]
+    
+    for table, id_col, seq_name in sequences:
+        if seq_name is None:
+            print(f"   ⏭️  {table}: пропускаем (string primary key)")
+            continue
+        
+        try:
+            # Получаем максимальное значение ID
+            max_result = session.execute(
+                text(f"SELECT COALESCE(MAX({id_col}), 0) FROM {table}")
+            ).scalar()
+            
+            next_val = int(max_result) + 1
+            
+            # Обновляем sequence
+            session.execute(
+                text(f"SELECT setval('{seq_name}', {next_val})")
+            )
+            
+            print(f"   ✅ {table}: setval = {next_val}")
+        except Exception as e:
+            print(f"   ⚠️  {table}: ошибка - {e}")
+
+
 def main():
     load_dotenv()
-    
+
     print("=" * 50)
     print("🌱 Seed DB - Заполнение базы данных")
     print("=" * 50)
-    
+
     try:
         with get_db_session() as session:
             seed_food_types(session)
             seed_menu_items(session)
             seed_users(session)
             seed_orders(session)
-            
+
             session.commit()
-            
+
+            # Сбрасываем sequences после коммита (всегда, даже если данные уже были)
+            reset_sequences(session)
+            session.commit()  # Коммитим reset_sequences!
+
             print("\n" + "=" * 50)
             print("✅ База данных успешно заполнена!")
             print("=" * 50)
-            
+
             # Вывод статистики
             print("\n📊 Статистика:")
             print(f"   Категорий: {session.query(FoodType).count()}")
@@ -546,7 +591,7 @@ def main():
             print(f"   Пользователей: {session.query(Users).count()}")
             print(f"   Сотрудников: {session.query(Staff).count()}")
             print(f"   Заказов: {session.query(Order).count()}")
-            
+
             print("\n🔐 Тестовые учётные данные:")
             print("   👨‍💼 Admin: admin / admin123")
             print("   👨‍💼 Waiter: waiter_anna / waiter123")
@@ -556,7 +601,7 @@ def main():
             print("   👤 Customer 3: customer3 / user123")
             print("   👤 Customer 4: customer4 / user123")
             print("   👤 Customer 5: customer5 / user123")
-            
+
     except Exception as e:
         print(f"\n❌ Ошибка: {e}")
         raise
