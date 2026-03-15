@@ -4,6 +4,7 @@ import Cart from "@/components/cart/Cart";
 
 import { headerItems, phoneNumber, mail } from "@/config/main";
 
+
 function CartPage() {
     return (
         <div className="flex flex-col min-h-screen">

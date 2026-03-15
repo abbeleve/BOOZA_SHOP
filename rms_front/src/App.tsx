@@ -4,6 +4,7 @@ import MainPage from "./pages/MainPage";
 import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import MenuControlPage from "./pages/administration/MenuControlPage";
 
 function Router() {
     return (
@@ -13,6 +14,7 @@ function Router() {
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/admin/menu" element={<MenuControlPage />} />
             </Routes>
         </BrowserRouter>
     );

@@ -6,7 +6,7 @@ import {
     type ReactNode,
     useCallback,
 } from 'react';
-import axios from 'axios';
+import apiClient from "@/api/client";
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type { 
     User, 
@@ -22,12 +22,12 @@ const ACCESS_TOKEN_KEY = 'booza_access_token';
 const REFRESH_TOKEN_KEY = 'booza_refresh_token';
 
 // Настройка axios
-axios.defaults.headers.common['Content-Type'] = 'application/json';
+apiClient.defaults.headers.common['Content-Type'] = 'application/json';
 
 // Интерцептор запроса: добавляет access token
-axios.interceptors.request.use((config) => {
+apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    if (token && !config.headers.Authorization) {
+    if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -51,16 +51,16 @@ const processQueue = (error: Error | null, token: string | null = null) => {
     failedQueue = [];
 };
 
-axios.interceptors.response.use(
+apiClient.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
         
         const requestUrl = originalRequest.url || '';
         if (
-            requestUrl.includes('/auth/login') ||
-            requestUrl.includes('/auth/register') ||
-            requestUrl.includes('/auth/refresh')
+            requestUrl.includes('/api/auth/login') ||
+            requestUrl.includes('/api/auth/register') ||
+            requestUrl.includes('/api/auth/refresh')
         ) {
             return Promise.reject(error);
         }
@@ -79,7 +79,7 @@ axios.interceptors.response.use(
                         ...(originalRequest as any).headers,
                         Authorization: `Bearer ${token}`,
                     };
-                    return axios(originalRequest);
+                    return apiClient(originalRequest);
                 })
                 .catch((err) => Promise.reject(err));
             }
@@ -91,7 +91,7 @@ axios.interceptors.response.use(
                 // Нет refresh token — разлогиниваем
                 localStorage.removeItem(ACCESS_TOKEN_KEY);
                 localStorage.removeItem(REFRESH_TOKEN_KEY);
-                delete axios.defaults.headers.common['Authorization'];
+                delete apiClient.defaults.headers.common['Authorization'];
                 isRefreshing = false;
                 processQueue(new Error('No refresh token'));
                 window.location.href = '/login';
@@ -100,7 +100,7 @@ axios.interceptors.response.use(
             
             try {
                 // Пытаемся получить новый access token
-                const { data } = await axios.post<AuthResponse>('/auth/refresh', {
+                const { data } = await apiClient.post<AuthResponse>('/api/auth/refresh', {
                     refresh_token: refreshToken,
                 } as RefreshTokenRequest);
                 
@@ -108,18 +108,18 @@ axios.interceptors.response.use(
                 
                 // Сохраняем новый токен
                 localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+                apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
                 
                 // Повторяем запросы из очереди
                 processQueue(null, newAccessToken);
                 
-                return axios(originalRequest);
+                return apiClient(originalRequest);
                 
             } catch (refreshError) {
                 // Refresh не удался — чистим всё и редиректим на логин
                 localStorage.removeItem(ACCESS_TOKEN_KEY);
                 localStorage.removeItem(REFRESH_TOKEN_KEY);
-                delete axios.defaults.headers.common['Authorization'];
+                delete apiClient.defaults.headers.common['Authorization'];
                 processQueue(refreshError as Error);
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
@@ -143,7 +143,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Валидация токена при старте
     const validateToken = useCallback(async (storedToken: string) => {
         try {
-            const { data } = await axios.get<User>('/auth/me', {
+            const { data } = await apiClient.get<User>('/api/auth/me', {
                 headers: { Authorization: `Bearer ${storedToken}` },
             });
             setUser(data);
@@ -152,7 +152,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             // Токен невалиден — чистим
             localStorage.removeItem(ACCESS_TOKEN_KEY);
             localStorage.removeItem(REFRESH_TOKEN_KEY);
-            delete axios.defaults.headers.common['Authorization'];
+            delete apiClient.defaults.headers.common['Authorization'];
         }
     }, []);
 
@@ -178,7 +178,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setError(null);
         
         try {
-            const { data } = await axios.post<AuthResponse>('/auth/login', {
+            const { data } = await apiClient.post<AuthResponse>('/api/auth/login', {
                 username,
                 password,
             });
@@ -193,7 +193,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
             localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token);
             
-            axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
             
             // Загружаем данные пользователя
             await refreshUser();
@@ -213,7 +213,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setError(null);
         
         try {
-            const { data } = await axios.post<AuthResponse>('/auth/register', registerData);
+            const { data } = await apiClient.post<AuthResponse>('/api/auth/register', registerData);
             
             if (!data.access_token || !data.refresh_token) {
                 throw new Error('Токены не получены от сервера');
@@ -224,7 +224,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
             localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token);
             
-            axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
             
             await refreshUser();
             
@@ -242,14 +242,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const currentRefresh = localStorage.getItem(REFRESH_TOKEN_KEY);
         if (!currentRefresh) throw new Error('No refresh token');
         
-        const { data } = await axios.post<AuthResponse>('/auth/refresh', {
+        const { data } = await apiClient.post<AuthResponse>('/api/auth/refresh', {
             refresh_token: currentRefresh,
         } as RefreshTokenRequest);
         
         if (data.access_token) {
             setToken(data.access_token);
             localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
         }
     }, []);
 
@@ -260,7 +260,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setRefreshToken(null);
         localStorage.removeItem(ACCESS_TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
-        delete axios.defaults.headers.common['Authorization'];
+        delete apiClient.defaults.headers.common['Authorization'];
     }, []);
 
     // Загрузка данных пользователя
@@ -269,7 +269,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         if (!currentToken) return;
         
         try {
-            const { data } = await axios.get<User>('/auth/me');
+            const { data } = await apiClient.get<User>('/api/auth/me');
             setUser(data);
         } catch {
             logout();
