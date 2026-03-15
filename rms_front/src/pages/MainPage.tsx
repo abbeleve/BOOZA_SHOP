@@ -40,7 +40,7 @@ function MainPage() {
                     categories={categories} 
                     products={menuItems.map(item => ({
                         id: item.menu_id,
-                        imageUrl: item.image_url || '/test_food_images/booza.png',
+                        imageUrl: "/api" + item.image_url || '/test_food_images/booza.png',
                         title: item.food_name,
                         category: item.category_name || '',
                         description: item.description || '',

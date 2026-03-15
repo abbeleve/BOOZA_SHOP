@@ -11,16 +11,18 @@ export const menuApi = {
         return response.data;
     },
 
-    createMenuItem: async (item: {
-        food_name: string;
-        price: number;
-        category_id: number;
-        description?: string;
-        image_url?: string;
-        is_available?: boolean;
-        preparation_time_minutes?: number;
-    }): Promise<MenuItem> => {
-        const response = await apiClient.post<MenuItem>('/api/menu', item)
+    getMenuItem: async (menuId: number): Promise<MenuItem> => {
+        const response = await apiClient.get<MenuItem>(`/api/menu/${menuId}`);
+        return response.data;
+    },
+
+    createMenuItem: async (formData: FormData, config?: any): Promise<MenuItem> => {
+        const response = await apiClient.post<MenuItem>('/api/menu', formData, config);
+        return response.data;
+    },
+
+    updateMenuItem: async (menuId: number, formData: FormData, config?: any): Promise<MenuItem> => {
+        const response = await apiClient.put<MenuItem>(`/api/menu/${menuId}`, formData, config);
         return response.data;
     },
 
@@ -33,5 +35,14 @@ export const categoriesApi = {
     getCategories: async (): Promise<Category[]> => {
         const response = await apiClient.get<Category[]>('/api/food-type');
         return response.data;
+    },
+
+    createCategory: async (name: string): Promise<Category> => {
+        const response = await apiClient.post<Category>('/api/food-type', { name });
+        return response.data;
+    },
+
+    deleteCategory: async (categoryId: number): Promise<void> => {
+        await apiClient.delete(`/api/food-type/${categoryId}`);
     },
 };

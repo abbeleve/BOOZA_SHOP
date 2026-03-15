@@ -52,7 +52,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
         <section className="container mx-auto px-4 py-6 bg-background">
 
             {/* Категории */}
-            <section className="flex flex-row flex-wrap gap-2 mb-8 sticky top-0 z-10 bg-background py-4">
+            <section className="flex flex-row flex-wrap gap-2 mb-8 lg:sticky lg:top-0 z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 lg:-mx-4 lg:px-4">
                 {categories.map((category, index) => (
                     <button
                         key={index}
@@ -71,7 +71,7 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                 <div
                     key={category}
                     id={`category-${category}`}
-                    className="mb-12 scroll-mt-24"
+                    className="mb-12 scroll-mt-24 px-2"
                 >
                     <h2 className="text-2xl font-main font-bold text-text-primary mb-6">
                         {category}

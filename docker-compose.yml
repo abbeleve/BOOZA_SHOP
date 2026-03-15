@@ -42,12 +42,10 @@ services:
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
-    volumes:
-      - ./backend:/app
     depends_on:
       - db
     volumes:
-      - ./backend/static:/app/static
+      - ./backend:/app
     # Запуск приложения (seed_db закомментирован - раскомментируйте для заполнения БД при старте)
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     # command: sh -c "python scripts/seed_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"

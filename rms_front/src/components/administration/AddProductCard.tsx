@@ -6,7 +6,7 @@ function AddProductCard({ onClick }: AddProductCardProps) {
     return (
         <button
             onClick={onClick}
-            className="flex flex-col items-center justify-center w-full h-full min-h-[200px] border-2 border-dashed border-surface-border rounded-xl bg-surface-card hover:bg-surface-hover hover:border-accent transition-all group"
+            className="flex flex-col items-center justify-center w-full h-full py-5 border-2 border-dashed border-surface-border rounded-xl bg-surface-card hover:bg-surface-hover hover:border-accent transition-all group"
             aria-label="Добавить товар"
         >
             <div className="flex flex-col items-center gap-3">

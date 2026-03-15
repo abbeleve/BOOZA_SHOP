@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { menuApi, categoriesApi } from '@/api/menu/menu';
 import { type Category } from '@/api/menu/schema';
 
-interface AddProductModalProps {
+interface EditProductModalProps {
     isOpen: boolean;
+    productId: number | null;
     onClose: () => void;
-    onProductAdded: () => void;
+    onProductUpdated: () => void;
 }
 
-function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalProps) {
+function EditProductModal({ isOpen, productId, onClose, onProductUpdated }: EditProductModalProps) {
     const [formData, setFormData] = useState({
         food_name: '',
         price: '',
@@ -33,11 +34,34 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
         }
     };
 
+    const loadProduct = async () => {
+        if (!productId) return;
+        try {
+            const product = await menuApi.getMenuItem(productId);
+            setFormData({
+                food_name: product.food_name,
+                price: product.price.toString(),
+                category_id: product.category_id.toString(),
+                description: product.description || '',
+                is_available: product.is_available,
+                preparation_time_minutes: parseInt(product.preparation_time) || 15,
+            });
+            if (product.image_url) {
+                const imageUrl = '/api' + product.image_url;
+                setImagePreview(imageUrl);
+            }
+        } catch (err) {
+            console.error('Failed to load product:', err);
+            setError('Ошибка при загрузке данных товара');
+        }
+    };
+
     useEffect(() => {
         if (isOpen) {
             loadCategories();
+            loadProduct();
         }
-    }, [isOpen]);
+    }, [isOpen, productId]);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -52,13 +76,11 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Validate file type
             const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
                 setError('Разрешены только JPG, PNG и WebP изображения');
                 return;
             }
-            // Validate file size (5MB max)
             if (file.size > 5 * 1024 * 1024) {
                 setError('Размер файла не должен превышать 5MB');
                 return;
@@ -66,7 +88,6 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
             setImageFile(file);
             setError(null);
 
-            // Create preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
@@ -88,6 +109,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
         setLoading(true);
         setError(null);
 
+        if (!productId) {
+            setError('ID товара не указан');
+            setLoading(false);
+            return;
+        }
+
         const formPayload = new FormData();
         formPayload.append('food_name', formData.food_name);
         formPayload.append('price', formData.price);
@@ -102,34 +129,21 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
         }
 
         try {
-            await menuApi.createMenuItem(formPayload, {
+            await menuApi.updateMenuItem(productId, formPayload, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            onProductAdded();
+            onProductUpdated();
             onClose();
-            setFormData({
-                food_name: '',
-                price: '',
-                category_id: '',
-                description: '',
-                is_available: true,
-                preparation_time_minutes: 15,
-            });
-            setImageFile(null);
-            setImagePreview(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Ошибка при добавлении товара');
+            setError(err.response?.data?.detail || 'Ошибка при обновлении товара');
         } finally {
             setLoading(false);
         }
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !productId) return null;
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -141,7 +155,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
                 <div className="bg-surface-card relative transform overflow-hidden rounded-lg shadow-xl transition-all sm:my-10 sm:w-full sm:max-w-lgs">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-surface-border">
-                        <h2 className="text-lg font-bold font-main text-text-primary">Добавить товар</h2>
+                        <h2 className="text-lg font-bold font-main text-text-primary">Редактировать товар</h2>
                         <button
                             onClick={onClose}
                             className="p-2 text-text-secondary hover:text-text-primary transition-colors"
@@ -330,7 +344,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
                                 disabled={loading}
                                 className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-text-inverse rounded-lg font-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Добавление...' : 'Добавить'}
+                                {loading ? 'Сохранение...' : 'Сохранить'}
                             </button>
                         </div>
                     </form>
@@ -340,4 +354,4 @@ function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalPro
     );
 }
 
-export default AddProductModal;
+export default EditProductModal;
