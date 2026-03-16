@@ -106,5 +106,5 @@ def delete_menu_item(db: Session, menu_id: int) -> bool:
         return False
 
     db.delete(item)
-    db.flush()  # Не коммитим
+    db.flush()  # Коммит в вызываюей функции
     return True

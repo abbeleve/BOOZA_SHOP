@@ -8,7 +8,8 @@ def create_order(
     user_id: int,
     delivery_address: str,
     items: List[Dict[str, int]],  # [{"menu_item_id": 1, "quantity": 2}, ...]
-    description: Optional[str] = None
+    description: Optional[str] = None,
+    phone: Optional[str] = None
 ) -> Order:
     """
     Создаёт заказ со всеми элементами в одной транзакции.
@@ -58,7 +59,8 @@ def create_order(
         status=Status.PENDING,
         delivery_address=delivery_address.strip(),
         total_amount=total_amount,
-        description=description
+        description=description,
+        phone=phone
     )
     db.add(order)
     db.flush()  # Получаем order_id для элементов
@@ -73,7 +75,7 @@ def create_order(
             quantity=item["quantity"],
             price=item["price"]  # Зафиксированная цена
         )
-    
+
     # Обновляем связь, чтобы элементы были доступны через order.items
     db.refresh(order)
 
@@ -171,6 +173,7 @@ def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
     for item in order.items:
         items.append({
             "order_food_id": item.order_food_id,
+            "menu_item_id": item.menu_item_id,
             "food_name": item.menu_item.food_name if item.menu_item else "Удалённый элемент",
             "quantity": item.quantity,
             "price_per_item": item.price,
@@ -184,6 +187,7 @@ def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
         "create_datetime": order.create_datetime.isoformat(),
         "end_datetime": order.end_datetime.isoformat() if order.end_datetime else None,
         "delivery_address": order.delivery_address,
+        "phone": order.phone,
         "total_amount": order.total_amount,
         "description": order.description,
         "user": {

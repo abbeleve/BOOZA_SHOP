@@ -45,24 +45,26 @@ def create_new_order(
 ):
     """
     Создаёт новый заказ от имени текущего пользователя.
-    
+
     - **delivery_address**: Адрес доставки (мин. 5 символов)
     - **items**: Список блюд (минимум 1)
     - **description**: Опциональный комментарий к заказу
+    - **phone**: Номер телефона для связи (мин. 10 символов)
     """
     # Конвертируем схемы в dict для CRUD
     items = [
         {"menu_item_id": item.menu_item_id, "quantity": item.quantity}
         for item in order_data.items
     ]
-    
+
     try:
         order = create_order(
             db=db,
             user_id=current_user.user_id,
             delivery_address=order_data.delivery_address,
             items=items,
-            description=order_data.description
+            description=order_data.description,
+            phone=order_data.phone
         )
         db.commit()
         db.refresh(order)
@@ -72,7 +74,7 @@ def create_new_order(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-    
+
     # Формируем ответ с элементами
     order_details = get_order_details(db, order.order_id)
     if not order_details:
@@ -80,7 +82,7 @@ def create_new_order(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Не удалось получить данные заказа после создания"
         )
-    
+
     return _map_order_details_to_response(order_details)
 
 
@@ -353,6 +355,7 @@ def _map_order_details_to_response(order_details: dict) -> OrderResponse:
         create_datetime=order_details["create_datetime"],
         end_datetime=order_details["end_datetime"],
         delivery_address=order_details["delivery_address"],
+        phone=order_details["phone"],
         total_amount=order_details["total_amount"],
         description=order_details["description"],
         items=[

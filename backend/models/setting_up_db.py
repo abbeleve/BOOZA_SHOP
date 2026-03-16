@@ -25,6 +25,7 @@ class Order(Base):
     delivery_address = Column(String, nullable=False)
     total_amount = Column(Integer, nullable=False)
     description = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
 
     user = relationship('Users', back_populates='orders')
