@@ -6,9 +6,11 @@ from enum import Enum
 
 class OrderStatusEnum(str, Enum):
     """Статусы заказа"""
-    PENDING = "PENDING"  # В обработке
-    COMPLETED = "COMPLETED"  # Выполнен
-    CANCELLED = "CANCELLED"  # Отменён
+    ACCEPTED = "ACCEPTED"      # Принят в работу
+    COOKING = "COOKING"        # Готовится
+    DELIVERING = "DELIVERING"  # Доставляется
+    COMPLETED = "COMPLETED"    # Выполнен
+    CANCELLED = "CANCELLED"    # Отменён
 
 
 class OrderItemCreate(BaseModel):

@@ -56,7 +56,7 @@ def create_order(
     order = Order(
         user_id=user_id,
         create_datetime=datetime.utcnow(),
-        status=Status.PENDING,
+        status=Status.ACCEPTED,
         delivery_address=delivery_address.strip(),
         total_amount=total_amount,
         description=description,
@@ -123,8 +123,8 @@ def update_order_status(
     # Автоматически устанавливаем время завершения для завершённых/отменённых заказов
     if new_status in (Status.COMPLETED, Status.CANCELLED):
         order.end_datetime = end_datetime or datetime.utcnow()
-    elif new_status == Status.PENDING:
-        order.end_datetime = None  # Сбрасываем если вернули в ожидание
+    elif new_status in (Status.ACCEPTED, Status.COOKING, Status.DELIVERING):
+        order.end_datetime = None  # Сбрасываем если заказ в процессе
 
     db.flush()  # Не коммитим
     return order
@@ -148,7 +148,7 @@ def delete_order(db: Session, order_id: int) -> bool:
         return False
 
     # Защита от удаления активных заказов
-    if order.status not in (Status.CANCELLED, Status.PENDING):
+    if order.status not in (Status.CANCELLED, Status.ACCEPTED):
         raise ValueError(
             f"Нельзя удалить заказ со статусом {order.status.name}. "
             "Сначала отмените заказ."

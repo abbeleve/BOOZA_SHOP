@@ -7,9 +7,11 @@ import enum
 Base = declarative_base()
 
 class Status(enum.Enum):
-    PENDING = 1
-    COMPLETED = 2
-    CANCELLED = 3
+    ACCEPTED = 1      # Принят в работу
+    COOKING = 2       # Готовится
+    DELIVERING = 3    # Доставляется
+    COMPLETED = 4     # Выполнен
+    CANCELLED = 5     # Отменён
 
 class Role(enum.Enum):
     STAFF = 1
