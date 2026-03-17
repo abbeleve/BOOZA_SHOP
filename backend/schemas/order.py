@@ -6,9 +6,11 @@ from enum import Enum
 
 class OrderStatusEnum(str, Enum):
     """Статусы заказа"""
-    PENDING = "PENDING"  # В обработке
-    COMPLETED = "COMPLETED"  # Выполнен
-    CANCELLED = "CANCELLED"  # Отменён
+    ACCEPTED = "ACCEPTED"      # Принят в работу
+    COOKING = "COOKING"        # Готовится
+    DELIVERING = "DELIVERING"  # Доставляется
+    COMPLETED = "COMPLETED"    # Выполнен
+    CANCELLED = "CANCELLED"    # Отменён
 
 
 class OrderItemCreate(BaseModel):
@@ -22,6 +24,7 @@ class OrderCreate(BaseModel):
     delivery_address: str = Field(..., min_length=5, max_length=500, description="Адрес доставки")
     items: List[OrderItemCreate] = Field(..., min_length=1, description="Список блюд для заказа")
     description: Optional[str] = Field(None, max_length=1000, description="Комментарий к заказу")
+    phone: str = Field(..., min_length=10, max_length=20, description="Номер телефона для связи")
 
     @field_validator('delivery_address')
     @classmethod
@@ -29,6 +32,17 @@ class OrderCreate(BaseModel):
         if not v or not v.strip():
             raise ValueError('Адрес доставки не может быть пустым')
         return v.strip()
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Номер телефона не может быть пустым')
+        # Удаляем все нецифровые символы кроме +
+        cleaned = ''.join(c for c in v if c.isdigit() or c == '+')
+        if len(cleaned) < 10:
+            raise ValueError('Номер телефона должен содержать минимум 10 символов')
+        return cleaned
 
 
 class OrderItemResponse(BaseModel):
@@ -52,6 +66,7 @@ class OrderResponse(BaseModel):
     create_datetime: datetime
     end_datetime: Optional[datetime] = None
     delivery_address: str
+    phone: Optional[str] = None
     total_amount: int
     description: Optional[str] = None
     items: List[OrderItemResponse] = []

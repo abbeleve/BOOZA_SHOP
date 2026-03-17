@@ -334,7 +334,7 @@ def seed_orders(session):
         {
             "order_id": 10,
             "user_id": 3,
-            "status": Status.PENDING,
+            "status": Status.ACCEPTED,
             "delivery_address": "г. Москва, ул. Мира, д. 25, кв. 100",
             "total_amount": 1490,
             "description": "Позвонить за 30 минут",
@@ -347,7 +347,7 @@ def seed_orders(session):
         {
             "order_id": 2,
             "user_id": 4,
-            "status": Status.PENDING,
+            "status": Status.ACCEPTED,
             "delivery_address": "г. Москва, пр. Победы, д. 50, кв. 25",
             "total_amount": 1590,
             "description": None,
@@ -400,7 +400,7 @@ def seed_orders(session):
         {
             "order_id": 9,
             "user_id": 6,
-            "status": Status.PENDING,
+            "status": Status.ACCEPTED,
             "delivery_address": "г. Москва, ул. Арбат, д. 15, кв. 42",
             "total_amount": 1570,
             "description": None,
@@ -431,7 +431,7 @@ def seed_orders(session):
         {
             "order_id": 11,
             "user_id": 7,
-            "status": Status.PENDING,
+            "status": Status.ACCEPTED,
             "delivery_address": "г. Москва, ул. Тверская, д. 8, кв. 15",
             "total_amount": 3030,
             "description": "Нужно к 19:00",
@@ -462,7 +462,7 @@ def seed_orders(session):
         {
             "order_id": 13,
             "user_id": 8,
-            "status": Status.PENDING,
+            "status": Status.ACCEPTED,
             "delivery_address": "г. Москва, ул. Садовая, д. 20, кв. 88",
             "total_amount": 2470,
             "description": None,
@@ -499,7 +499,7 @@ def seed_orders(session):
                 total_amount=order_data["total_amount"],
                 description=order_data["description"],
                 create_datetime=datetime.utcnow(),
-                end_datetime=datetime.utcnow() if order_data["status"] != Status.PENDING else None
+                end_datetime=datetime.utcnow() if order_data["status"] != Status.ACCEPTED else None
             )
             session.add(order)
             session.flush()  # Получаем order_id

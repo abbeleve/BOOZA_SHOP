@@ -2,16 +2,15 @@ from sqlalchemy.orm import Session
 from models.setting_up_db import FoodType
 from typing import Optional, List
 
-def create_food_category(db: Session, category_id: int, name: str) -> FoodType:
+def create_food_category(db: Session, name: str) -> FoodType:
     """
     Создаёт новую категорию еды.
+    category_id определяется автоматически (autoincrement).
     ВАЖНО: caller должен вызвать db.commit() после создания.
     """
     if get_food_category_by_name(db, name):
         raise ValueError(f"Категория '{name}' уже существует")
-    if get_food_category(db, category_id=category_id):
-        raise ValueError(f"Категория с ID: {category_id} уже существует")
-    category = FoodType(category_id=category_id, name=name)
+    category = FoodType(name=name)
     db.add(category)
     db.flush()  # Получаем category_id, но не коммитим
     return category

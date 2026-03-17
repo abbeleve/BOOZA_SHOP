@@ -8,7 +8,8 @@ from crud.food_type import (
     get_food_category,
     get_food_categories,
     update_food_category,
-    delete_food_category
+    delete_food_category,
+    get_food_category_by_name
 )
 from models.database import get_db
 from models.setting_up_db import Users
@@ -30,22 +31,20 @@ def create_category(
 ):
     """
     Создаёт новую категорию блюд (только для администраторов).
-    
-    - **category_id**: Уникальный ID категории
+
     - **name**: Название категории (например, "Пицца", "Суши")
     """
-    # Проверяем, не существует ли уже категория с таким ID или именем
-    existing_by_id = get_food_category(db, category.category_id)
-    if existing_by_id:
+    # Проверяем, не существует ли уже категория с таким именем
+    existing = get_food_category_by_name(db, category.name)
+    if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Категория с ID {category.category_id} уже существует"
+            detail=f"Категория '{category.name}' уже существует"
         )
-    
+
     try:
         db_category = create_food_category(
             db=db,
-            category_id=category.category_id,
             name=category.name
         )
         db.commit()
@@ -56,7 +55,7 @@ def create_category(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-    
+
     return FoodCategoryResponse(
         category_id=db_category.category_id,
         name=db_category.name
