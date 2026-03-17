@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useCart } from "@/contexts/CartContext";
+import CheckoutModal from "./CheckoutModal";
 
 const IconTrash = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,6 +25,7 @@ const IconPlus = () => (
 
 function Cart() {
     const { items, updateQuantity, removeFromCart, totalPrice, clearCart, isLoaded } = useCart();
+    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
     if (!isLoaded) {
         return (
@@ -118,15 +121,15 @@ function Cart() {
                             <p className="text-3xl font-bold text-text-primary font-main">{totalPrice.toLocaleString('ru-RU')} ₽</p>
                         </div>
                         <div className="flex gap-3">
-                            <button 
+                            <button
                                 onClick={clearCart}
                                 className="px-6 py-3 border border-surface-border text-text-primary rounded-xl hover:bg-surface-border transition-colors font-main font-medium"
                             >
                                 Очистить
                             </button>
-                            <button 
+                            <button
                                 className="px-8 py-3 bg-accent text-text-inverse font-bold rounded-xl hover:bg-accent-hover transition-colors shadow-sm font-main"
-                                onClick={() => alert('Переход к оформлению заказа...')}
+                                onClick={() => setIsCheckoutModalOpen(true)}
                             >
                                 Оформить заказ
                             </button>
@@ -134,6 +137,14 @@ function Cart() {
                     </div>
                 </div>
             </div>
+
+            <CheckoutModal
+                isOpen={isCheckoutModalOpen}
+                onClose={() => setIsCheckoutModalOpen(false)}
+                onOrderCompleted={() => {
+                    setIsCheckoutModalOpen(false);
+                }}
+            />
         </div>
     );
 }

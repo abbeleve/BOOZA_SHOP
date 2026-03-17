@@ -171,6 +171,7 @@ def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
     for item in order.items:
         items.append({
             "order_food_id": item.order_food_id,
+            "menu_item_id": item.menu_item.menu_id,
             "food_name": item.menu_item.food_name if item.menu_item else "Удалённый элемент",
             "quantity": item.quantity,
             "price_per_item": item.price,
