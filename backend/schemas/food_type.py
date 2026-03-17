@@ -4,7 +4,6 @@ from typing import Optional
 
 class FoodCategoryCreate(BaseModel):
     """Схема для создания категории блюд"""
-    category_id: int = Field(..., gt=0, description="ID категории (уникальный)")
     name: str = Field(..., min_length=1, max_length=100, description="Название категории")
 
 

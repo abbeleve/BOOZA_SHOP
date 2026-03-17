@@ -8,7 +8,8 @@ def create_order(
     user_id: int,
     delivery_address: str,
     items: List[Dict[str, int]],  # [{"menu_item_id": 1, "quantity": 2}, ...]
-    description: Optional[str] = None
+    description: Optional[str] = None,
+    phone: Optional[str] = None
 ) -> Order:
     """
     Создаёт заказ со всеми элементами в одной транзакции.
@@ -55,10 +56,11 @@ def create_order(
     order = Order(
         user_id=user_id,
         create_datetime=datetime.utcnow(),
-        status=Status.PENDING,
+        status=Status.ACCEPTED,
         delivery_address=delivery_address.strip(),
         total_amount=total_amount,
-        description=description
+        description=description,
+        phone=phone
     )
     db.add(order)
     db.flush()  # Получаем order_id для элементов
@@ -73,7 +75,7 @@ def create_order(
             quantity=item["quantity"],
             price=item["price"]  # Зафиксированная цена
         )
-    
+
     # Обновляем связь, чтобы элементы были доступны через order.items
     db.refresh(order)
 
@@ -121,8 +123,8 @@ def update_order_status(
     # Автоматически устанавливаем время завершения для завершённых/отменённых заказов
     if new_status in (Status.COMPLETED, Status.CANCELLED):
         order.end_datetime = end_datetime or datetime.utcnow()
-    elif new_status == Status.PENDING:
-        order.end_datetime = None  # Сбрасываем если вернули в ожидание
+    elif new_status in (Status.ACCEPTED, Status.COOKING, Status.DELIVERING):
+        order.end_datetime = None  # Сбрасываем если заказ в процессе
 
     db.flush()  # Не коммитим
     return order
@@ -146,7 +148,7 @@ def delete_order(db: Session, order_id: int) -> bool:
         return False
 
     # Защита от удаления активных заказов
-    if order.status not in (Status.CANCELLED, Status.PENDING):
+    if order.status not in (Status.CANCELLED, Status.ACCEPTED):
         raise ValueError(
             f"Нельзя удалить заказ со статусом {order.status.name}. "
             "Сначала отмените заказ."
@@ -171,6 +173,7 @@ def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
     for item in order.items:
         items.append({
             "order_food_id": item.order_food_id,
+            "menu_item_id": item.menu_item_id,
             "food_name": item.menu_item.food_name if item.menu_item else "Удалённый элемент",
             "quantity": item.quantity,
             "price_per_item": item.price,
@@ -184,6 +187,7 @@ def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
         "create_datetime": order.create_datetime.isoformat(),
         "end_datetime": order.end_datetime.isoformat() if order.end_datetime else None,
         "delivery_address": order.delivery_address,
+        "phone": order.phone,
         "total_amount": order.total_amount,
         "description": order.description,
         "user": {

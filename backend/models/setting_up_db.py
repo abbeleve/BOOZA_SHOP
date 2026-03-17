@@ -7,9 +7,11 @@ import enum
 Base = declarative_base()
 
 class Status(enum.Enum):
-    PENDING = 1
-    COMPLETED = 2
-    CANCELLED = 3
+    ACCEPTED = 1      # Принят в работу
+    COOKING = 2       # Готовится
+    DELIVERING = 3    # Доставляется
+    COMPLETED = 4     # Выполнен
+    CANCELLED = 5     # Отменён
 
 class Role(enum.Enum):
     STAFF = 1
@@ -25,6 +27,7 @@ class Order(Base):
     delivery_address = Column(String, nullable=False)
     total_amount = Column(Integer, nullable=False)
     description = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
 
     user = relationship('Users', back_populates='orders')

@@ -49,14 +49,24 @@ def _validate_file(file: UploadFile) -> str:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Файл не указан"
         )
-    
+
     ext = Path(file.filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Недопустимый формат. Разрешены: {', '.join(ALLOWED_EXTENSIONS)}"
         )
-    
+
+    # Проверяем размер файла
+    file.file.seek(0, 2)  # Перемещаемся в конец файла
+    file_size = file.file.tell()
+    file.file.seek(0)  # Возвращаемся в начало
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Размер файла превышает {MAX_FILE_SIZE // (1024 * 1024)} МБ"
+        )
+
     return ext
 
 
@@ -396,4 +406,5 @@ def delete_menu_item_endpoint(
             detail="Не удалось удалить элемент меню"
         )
 
+    db.commit()
     return {"message": "Элемент меню успешно удалён"}
