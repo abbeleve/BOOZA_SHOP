@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCart } from "@/contexts/CartContext";
 import CheckoutModal from "./CheckoutModal";
+import { BeatLoader } from 'react-spinners';
 
 const IconTrash = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,7 +31,7 @@ function Cart() {
     if (!isLoaded) {
         return (
             <div className="p-8 text-center text-text-secondary font-main">
-                Загрузка корзины...
+                <BeatLoader color="var(--color-accent)" />
             </div>
         );
     }

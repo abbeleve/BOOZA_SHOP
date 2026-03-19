@@ -7,6 +7,7 @@ export interface OrderCreate {
     delivery_address: string;
     items: OrderItemCreate[];
     description?: string;
+    phone: string;
 }
 
 export interface OrderItemResponse {

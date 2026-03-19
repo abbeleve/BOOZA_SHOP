@@ -2,29 +2,12 @@ import { useState, useEffect } from 'react';
 import { orderApi } from '@/api/order/order';
 import { type OrderShortResponse, type OrderResponse } from '@/api/order/schema';
 import { BeatLoader } from 'react-spinners';
+import { OrderStatus, statusColors, statusLabels } from './utils';
 
 interface OrderModalProps {
     orderId: number | null;
     onClose: () => void;
 }
-
-const statusColors: Record<string, string> = {
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    processing: 'bg-blue-100 text-blue-800',
-    preparing: 'bg-purple-100 text-purple-800',
-    delivering: 'bg-orange-100 text-orange-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
-};
-
-const statusLabels: Record<string, string> = {
-    PENDING: 'Ожидает подтверждения',
-    processing: 'В обработке',
-    preparing: 'Готовится',
-    delivering: 'Доставляется',
-    completed: 'Выполнен',
-    cancelled: 'Отменён',
-};
 
 function OrderModal({ orderId, onClose }: OrderModalProps) {
     const [order, setOrder] = useState<OrderResponse | null>(null);
@@ -76,8 +59,8 @@ function OrderModal({ orderId, onClose }: OrderModalProps) {
                             <div className="space-y-4">
                                 {/* Status and Date */}
                                 <div className="flex justify-between items-center">
-                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}`}>
-                                        {statusLabels[order.status] || order.status}
+                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[order.status as OrderStatus] || 'bg-gray-100 text-gray-800'}`}>
+                                        {statusLabels[order.status as OrderStatus] || order.status}
                                     </span>
                                     <span className="text-sm text-text-secondary font-main">
                                         {new Date(order.create_datetime).toLocaleString('ru-RU')}

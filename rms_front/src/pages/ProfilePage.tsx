@@ -7,6 +7,7 @@ import { orderApi } from '@/api/order/order';
 import { type OrderShortResponse } from '@/api/order/schema';
 
 import { headerItems, phoneNumber, mail } from "@/config/main";
+import { BeatLoader } from 'react-spinners';
 
 
 interface UserProfile {
@@ -16,9 +17,14 @@ interface UserProfile {
 }
 
 function ProfilePage() {
-    const { user, logout } = useUser();
+    const { user, isLoading, logout } = useUser();
     const [isEditing, setIsEditing] = useState(false);
     const [orders, setOrders] = useState<OrderShortResponse[]>([]);
+    const [profile, setProfile] = useState<UserProfile>({
+        username: '',
+        email: '',
+        phone: '',
+    });
 
     useEffect(() => {
         orderApi.getMyOrders()
@@ -26,15 +32,27 @@ function ProfilePage() {
             .catch(console.error);
     }, []);
 
+    useEffect(() => {
+        if (user) {
+            setProfile({
+                username: user.username,
+                email: user.email || '',
+                phone: user.phone || '',
+            });
+        }
+    }, [user]);
+
+    if (isLoading) {
+        return (
+            <div className="p-8 text-center text-text-secondary font-main">
+                <BeatLoader color="var(--color-accent)" />
+            </div>
+        );
+    }
+
     if (!user) {
         return <Navigate to="/login" replace />;
     }
-
-    const [profile, setProfile] = useState<UserProfile>({
-        username: user.username,
-        email: user.email || '',
-        phone: user.phone || '',
-    });
 
     const handleSave = () => {
         // TODO: Implement profile update
@@ -42,11 +60,13 @@ function ProfilePage() {
     };
 
     const handleCancel = () => {
-        setProfile({
-            username: user.username,
-            email: user.email || '',
-            phone: user.phone || '',
-        });
+        if (user) {
+            setProfile({
+                username: user.username,
+                email: user.email || '',
+                phone: user.phone || '',
+            });
+        }
         setIsEditing(false);
     };
 

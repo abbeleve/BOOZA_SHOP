@@ -13,6 +13,14 @@ function Header({ items, phoneNumber }: HeaderProps) {
     const { totalCount } = useCart();
     const { user, logout } = useUser();
 
+    // Фильтруем ссылки: "Сотрудникам" только для staff/admin
+    const filteredItems = items.filter(item => {
+        if (item.link === "/admin/menu") {
+            return user?.is_staff || user?.role === "staff" || user?.role === "admin";
+        }
+        return true;
+    });
+
     return (
         <header className="flex flex-col md:flex-row md:gap-10 px-4 md:px-10 pt-5 pb-4">
             <div className="">
@@ -21,7 +29,7 @@ function Header({ items, phoneNumber }: HeaderProps) {
             <div className="flex flex-col md:flex-row md:justify-between w-full">
                 {/* Навигация */}
                 <div className="flex flex-row justify-center gap-3 py-2">
-                    {items.map((item, index) => (
+                    {filteredItems.map((item, index) => (
                         <Link 
                             key={index} 
                             to={item.link}

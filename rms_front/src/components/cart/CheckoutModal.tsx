@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useUser } from '@/contexts/UserContext';
 import { orderApi } from '@/api/order/order';
 import { type OrderCreate } from '@/api/order/schema';
+import { usePhoneMask } from '@/hooks/usePhoneMask';
 
 interface CheckoutModalProps {
     isOpen: boolean;
@@ -17,14 +19,26 @@ declare global {
 
 function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps) {
     const { items, totalPrice, clearCart } = useCart();
+    const { user } = useUser();
     const [deliveryAddress, setDeliveryAddress] = useState('');
     const [description, setDescription] = useState('');
+    const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [mapInitialized, setMapInitialized] = useState(false);
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<any>(null);
     const placemarkRef = useRef<any>(null);
+
+    const { formatPhoneValue } = usePhoneMask();
+
+    useEffect(() => {
+        if (isOpen && user?.phone) {
+            setPhone(formatPhoneValue(user.phone));
+        } else if (isOpen) {
+            setPhone('');
+        }
+    }, [isOpen, user, formatPhoneValue]);
 
     useEffect(() => {
         if (isOpen && mapContainerRef.current && !mapInitialized) {
@@ -178,7 +192,7 @@ function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps
         });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -189,11 +203,20 @@ function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps
             return;
         }
 
+        if (!phone.trim()) {
+            setError('Пожалуйста, укажите номер телефона');
+            setLoading(false);
+            return;
+        }
+
         if (items.length === 0) {
             setError('Корзина пуста');
             setLoading(false);
             return;
         }
+
+        // Clean phone number for API (only digits with + prefix)
+        const cleanPhone = '+7' + phone.replace(/\D/g, '').slice(-10);
 
         const orderData: OrderCreate = {
             delivery_address: deliveryAddress,
@@ -202,6 +225,7 @@ function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps
                 quantity: item.quantity,
             })),
             description: description.trim() || undefined,
+            phone: cleanPhone,
         };
 
         try {
@@ -211,6 +235,7 @@ function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps
             onClose();
             setDeliveryAddress('');
             setDescription('');
+            setPhone('');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Ошибка при создании заказа');
         } finally {
@@ -279,6 +304,24 @@ function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps
                             />
                         </div>
 
+                        {/* Номер телефона */}
+                        <div>
+                            <label className="block text-sm font-medium font-main text-text-primary mb-1">
+                                Номер телефона *
+                            </label>
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => {
+                                    const formatted = formatPhoneValue(e.target.value);
+                                    setPhone(formatted);
+                                }}
+                                className="w-full px-3 py-2 bg-surface-base border border-surface-border rounded-lg text-text-primary font-main focus:outline-none focus:ring-2 focus:ring-accent"
+                                placeholder="+7 (___) ___-__-__"
+                                required
+                            />
+                        </div>
+
                         {/* Комментарий к заказу */}
                         <div>
                             <label className="block text-sm font-medium font-main text-text-primary mb-1">
@@ -327,7 +370,7 @@ function CheckoutModal({ isOpen, onClose, onOrderCompleted }: CheckoutModalProps
                             </button>
                             <button
                                 type="submit"
-                                disabled={loading || !deliveryAddress.trim()}
+                                disabled={loading || !deliveryAddress.trim() || !phone.trim()}
                                 className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-text-inverse rounded-lg font-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? 'Создание...' : 'Подтвердить заказ'}
