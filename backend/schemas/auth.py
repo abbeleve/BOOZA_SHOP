@@ -31,17 +31,3 @@ class TokenData(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
-
-class UserUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=2, max_length=29, description="Имя")
-    surname: Optional[str] = Field(None, min_length=2, max_length=29, description="Фамилия")
-    patronymic: Optional[str] = Field(None, max_length=29, description="Отчество")
-    email: Optional[EmailStr] = Field(None, description="Email")
-    phone: Optional[str] = Field(None, min_length=10, max_length=20, description="Телефон")
-    address: Optional[str] = Field(None, description="Адрес доставки")
-
-    @validator('phone')
-    def validate_phone_format(cls, v):
-        if v is not None and not any(c.isdigit() for c in v):
-            raise ValueError('Телефон должен содержать цифры')
-        return v.strip() if v else v
