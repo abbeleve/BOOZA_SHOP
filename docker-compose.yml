@@ -45,6 +45,8 @@ services:
     depends_on:
       - db
     volumes:
+      # Монтируем весь код бэкенда для hot reload
+      - ./backend:/app
       - ./backend/static:/app/static
     # Запуск приложения (seed_db закомментирован - раскомментируйте для заполнения БД при старте)
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
