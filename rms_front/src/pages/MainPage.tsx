@@ -33,11 +33,11 @@ function MainPage() {
     }, []);
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col min-h-screen">
             <Header items={headerItems} phoneNumber={phoneNumber}/>
-            <main>
-                <Menu 
-                    categories={categories} 
+            <main className="grow">
+                <Menu
+                    categories={categories}
                     products={menuItems.map(item => ({
                         id: item.menu_id,
                         imageUrl: "/api" + item.image_url || '/test_food_images/booza.png',
@@ -46,7 +46,7 @@ function MainPage() {
                         description: item.description || '',
                         price: `${item.price} ₽`,
                     }))}
-                    loading={loading} 
+                    loading={loading}
                 />
             </main>
             <Footer mainLinks={headerItems} additionalLinks={[]} mail={mail} phoneNumber={phoneNumber} />

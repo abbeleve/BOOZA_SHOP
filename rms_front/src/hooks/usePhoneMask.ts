@@ -7,16 +7,16 @@ export function usePhoneMask(initialValue: string = '') {
     const formatPhone = useCallback((raw: string): string => {
         // Удаляем всё кроме цифр
         const digits = raw.replace(/\D/g, '');
-        
+
         // Обрабатываем пустой ввод
         if (!digits) return '';
-        
+
         // Убираем лидирующие 8 или 7, если есть
         const cleaned = digits.replace(/^([87])?/, '');
-        
+
         // Начинаем собирать номер
         let result = '+7';
-        
+
         if (cleaned.length > 0) {
             result += ' (' + cleaned.slice(0, 3);
         }
@@ -29,7 +29,7 @@ export function usePhoneMask(initialValue: string = '') {
         if (cleaned.length >= 8) {
             result += '-' + cleaned.slice(8, 10);
         }
-        
+
         return result;
     }, []);
 
@@ -55,5 +55,6 @@ export function usePhoneMask(initialValue: string = '') {
         getRawValue,
         reset,
         setValue: (val: string) => setValue(formatPhone(val)),
+        formatPhoneValue: formatPhone,
     };
 }
