@@ -5,7 +5,17 @@ from fastapi.staticfiles import StaticFiles
 from api.endpoints import auth, staff, menu, food_type, order
 from models.database import engine
 
-app = FastAPI(title="BOOZA_SHOP API", version="1.0.0")
+app = FastAPI(title="BOOZA_SHOP API",
+              version="1.0.0")
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Монтируем папку со статикой (изображения блюд)
 # Доступ к изображениям: http://localhost:8000/static/images/...
