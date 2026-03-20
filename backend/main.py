@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from api.endpoints import auth, staff, menu, food_type, order
+from api.endpoints import auth, staff, menu, food_type, order, analytics
 from models.database import engine
 
 app = FastAPI(title="BOOZA_SHOP API", version="1.0.0")
@@ -17,6 +17,7 @@ app.include_router(staff.router)
 app.include_router(menu.router)
 app.include_router(food_type.router)
 app.include_router(order.router)
+app.include_router(analytics.router)
 
 @app.get("/")
 async def root():
