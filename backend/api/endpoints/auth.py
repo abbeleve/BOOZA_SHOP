@@ -8,12 +8,13 @@ from core.security import (
     decode_token
 )
 from core.config import settings
-from schemas.auth import UserRegister, UserLogin, Token, RefreshTokenRequest
+from schemas.auth import UserRegister, UserLogin, Token, RefreshTokenRequest, UserUpdate
 from crud.users import (
     create_user,
     get_user_by_username,
     get_user_by_email,
-    get_user_by_phone
+    get_user_by_phone,
+    update_user as update_user_crud
 )
 from models.database import get_db
 from models.setting_up_db import Users
@@ -116,4 +117,59 @@ async def get_current_user_info(current_user: Users = Depends(get_current_user))
         "address": current_user.address,
         "is_staff": current_user.staff is not None,
         "role": current_user.staff.role.name if current_user.staff else None
+    }
+
+@router.put("/me", response_model=dict)
+async def update_current_user(
+    user_data: UserUpdate,
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Обновить данные текущего пользователя.
+    
+    Можно обновить следующие поля:
+    - name: Имя
+    - surname: Фамилия
+    - patronymic: Отчество
+    - email: Email (должен быть уникальным)
+    - phone: Телефон (должен быть уникальным)
+    - address: Адрес доставки
+    """
+    # Извлекаем только заполненные поля
+    update_data = {
+        key: value for key, value in user_data.dict(exclude_unset=True).items()
+        if value is not None
+    }
+    
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Необходимо указать хотя бы одно поле для обновления"
+        )
+    
+    try:
+        updated_user = update_user_crud(db, user_id=current_user.user_id, **update_data)
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Пользователь не найден"
+            )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    
+    return {
+        "message": "Данные пользователя успешно обновлены",
+        "user": {
+            "user_id": updated_user.user_id,
+            "username": updated_user.username,
+            "name": updated_user.name,
+            "surname": updated_user.surname,
+            "patronymic": updated_user.patronymic,
+            "email": updated_user.email,
+            "phone": updated_user.phone,
+            "address": updated_user.address,
+            "is_staff": updated_user.staff is not None,
+            "role": updated_user.staff.role.name if updated_user.staff else None
+        }
     }
