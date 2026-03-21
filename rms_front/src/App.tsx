@@ -11,35 +11,35 @@ import AccessDeniedPage from "./pages/AccessDeniedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Router() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/admin/orders" element={
-            <ProtectedRoute requiredRole="staff">
-                <OrdersControlPage />
-            </ProtectedRoute>
-        } />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/access-denied" element={<AccessDeniedPage />} />
-        <Route
-          path="/admin/menu"
-          element={
-            <ProtectedRoute requiredRole="staff">
-              <MenuControlPage />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<MainPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/admin/orders" element={
+                    <ProtectedRoute requiredRole="staff">
+                        <OrdersControlPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/access-denied" element={<AccessDeniedPage />} />
+                <Route
+                    path="/admin/menu"
+                    element={
+                        <ProtectedRoute requiredRole="staff">
+                            <MenuControlPage />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 function App() {
-  return <Router />
+    return <Router />
 }
 
 export default App;
