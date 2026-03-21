@@ -15,8 +15,8 @@ export const statusColors: Record<OrderStatus, string> = {
 };
 
 export const statusLabels: Record<OrderStatus, string> = {
-    [OrderStatus.Accepted]: 'Ожидает подтверждения',
-    [OrderStatus.Cooking]: 'В обработке',
+    [OrderStatus.Accepted]: 'Принят',
+    [OrderStatus.Cooking]: 'Готовится',
     [OrderStatus.Delivering]: 'Доставляется',
     [OrderStatus.Completed]: 'Выполнен',
     [OrderStatus.Cancelled]: 'Отменён',
@@ -27,3 +27,23 @@ export const activeStatuses: OrderStatus[] = [
     OrderStatus.Cooking,
     OrderStatus.Delivering,
 ];
+
+export const getNextStatuses: Record<OrderStatus, OrderStatus[]> = {
+    [OrderStatus.Accepted]: [OrderStatus.Cooking, OrderStatus.Cancelled],
+    [OrderStatus.Cooking]: [OrderStatus.Delivering, OrderStatus.Cancelled],
+    [OrderStatus.Delivering]: [OrderStatus.Completed, OrderStatus.Cancelled],
+    [OrderStatus.Completed]: [],
+    [OrderStatus.Cancelled]: [],
+};
+
+export const canChangeStatus = (currentStatus: OrderStatus): boolean => {
+    return getNextStatuses[currentStatus]?.length > 0;
+};
+
+export const actionLabels: Record<OrderStatus, string> = {
+    [OrderStatus.Accepted]: 'Принять',
+    [OrderStatus.Cooking]: 'Готовить',
+    [OrderStatus.Delivering]: 'В доставку',
+    [OrderStatus.Completed]: 'Завершить',
+    [OrderStatus.Cancelled]: 'Отменить',
+};
