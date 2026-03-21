@@ -26,6 +26,7 @@ export interface OrderResponse {
     create_datetime: string;
     end_datetime: string | null;
     delivery_address: string;
+    phone: string | null;
     total_amount: number;
     description: string | null;
     items: OrderItemResponse[];
