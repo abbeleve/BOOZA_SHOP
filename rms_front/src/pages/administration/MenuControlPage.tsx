@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdministrationHeader from "@/components/administration/AdministraionHeader";
+import { adminHeaderItems } from '@/config/main';
 import AddProductCard from "@/components/administration/AddProductCard";
 import AddProductModal from "@/components/administration/AddProductModal";
 import EditProductModal from "@/components/administration/EditProductModal";
@@ -9,12 +10,6 @@ import { menuApi, categoriesApi } from "@/api/menu/menu";
 import { type MenuItem, type Category } from '@/api/menu/schema';
 import { BeatLoader } from "react-spinners";
 
-const adminHeaderItems = [
-    { label: "Меню", link: "/admin/menu" },
-    { label: "Заказы", link: "/admin/orders" },
-    { label: "Персонал", link: "/admin/staff" },
-    { label: "Настройки", link: "/admin/settings" },
-];
 
 function MenuControlPage() {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);

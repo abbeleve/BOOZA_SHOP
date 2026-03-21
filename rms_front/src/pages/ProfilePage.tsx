@@ -8,7 +8,7 @@ import { authApi } from '@/api/auths/auth';
 import type { OrderShortResponse } from '@/api/order/schema';
 import type { UserUpdateRequest } from '@/api/auths/schema';
 
-import { headerItems, phoneNumber, mail } from "@/config/main";
+import { headerItems, phoneNumber } from "@/config/main";
 import { BeatLoader } from 'react-spinners';
 
 
