@@ -43,6 +43,22 @@ export interface RefreshTokenRequest {
     refresh_token: string;
 }
 
+// Запрос на обновление профиля
+export interface UserUpdateRequest {
+    name?: string;
+    surname?: string;
+    patronymic?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+}
+
+// Ответ при обновлении профиля
+export interface UserUpdateResponse {
+    message: string;
+    user: User;
+}
+
 // Контекст
 export interface AuthContextType {
     user: User | null;
