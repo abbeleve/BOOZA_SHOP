@@ -3,7 +3,7 @@ import { useUser } from '@/contexts/UserContext';
 import AdministrationHeader from "@/components/administration/AdministraionHeader";
 import { BeatLoader } from "react-spinners";
 import apiClient from '@/api/client';
-import { adminHeaderItems } from "@/config/admin";
+import { adminHeaderItems } from '@/config/main';
 
 interface Customer {
   user_id: number;

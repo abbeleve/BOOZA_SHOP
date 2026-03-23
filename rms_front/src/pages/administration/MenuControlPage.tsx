@@ -8,7 +8,7 @@ import AdminProductCard from "@/components/administration/AdminProductCard";
 import { menuApi, categoriesApi } from "@/api/menu/menu";
 import { type MenuItem, type Category } from '@/api/menu/schema';
 import { BeatLoader } from "react-spinners";
-import { adminHeaderItems } from "@/config/admin";
+import { adminHeaderItems } from '@/config/main';
 
 
 function MenuControlPage() {

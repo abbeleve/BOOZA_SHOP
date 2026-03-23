@@ -6,7 +6,7 @@ import apiClient from '@/api/client';
 import AddStaffModal from '@/components/administration/AddStaffModal';
 import EditStaffModal from '@/components/administration/EditStaffModal';
 import ChangePasswordModal from '@/components/administration/ChangePasswordModal';
-import { adminHeaderItems } from "@/config/admin";
+import { adminHeaderItems } from '@/config/main';
 
 
 interface StaffMember {
