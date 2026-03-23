@@ -3,8 +3,8 @@ import { type NavigationLink } from "@/types/header";
 
 export const headerItems: NavigationLink[] = [
     {label: "Меню", link: "/"},
-    {label: "Доставка", link: "/"},
-    {label: "О нас", link: "/"},
+    // {label: "Доставка", link: "/"},
+    // {label: "О нас", link: "/"},
     {label: "Сотрудникам", link: "/admin/menu"}
 ];
 
