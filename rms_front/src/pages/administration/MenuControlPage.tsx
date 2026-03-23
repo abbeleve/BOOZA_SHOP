@@ -8,13 +8,8 @@ import AdminProductCard from "@/components/administration/AdminProductCard";
 import { menuApi, categoriesApi } from "@/api/menu/menu";
 import { type MenuItem, type Category } from '@/api/menu/schema';
 import { BeatLoader } from "react-spinners";
+import { adminHeaderItems } from "@/config/admin";
 
-const adminHeaderItems = [
-    { label: "Меню", link: "/admin/menu" },
-    { label: "Заказы", link: "/admin/orders" },
-    { label: "Персонал", link: "/admin/staff" },
-    { label: "Настройки", link: "/admin/settings" },
-];
 
 function MenuControlPage() {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);

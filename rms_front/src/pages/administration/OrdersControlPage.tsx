@@ -7,13 +7,8 @@ import Orders from "@/components/orders/Orders";
 import OrdersFilter from "@/components/orders/OrdersFilter";
 import { BeatLoader } from "react-spinners";
 import { activeStatuses } from '@/components/orders/utils';
+import { adminHeaderItems } from "@/config/admin";
 
-const adminHeaderItems = [
-    { label: "Меню", link: "/admin/menu" },
-    { label: "Заказы", link: "/admin/orders" },
-    { label: "Персонал", link: "/admin/staff" },
-    { label: "Настройки", link: "/admin/settings" },
-];
 
 function OrdersControlPage() {
     const { user } = useUser();
