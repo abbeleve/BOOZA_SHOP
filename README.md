@@ -9,7 +9,6 @@
 [![Docker](https://img.shields.io/badge/Docker-24%2B-2496ED?logo=docker)](https://www.docker.com/)
 
 **Система управления рестораном или позной с клиентским интерфейсом заказа и админкой для меню, заказов и персонала**
-
 </div>
 
 ---
@@ -78,6 +77,8 @@ git clone https://github.com/abbeleve/BOOZA_SHOP.git
 ```bash
 make init
 ```
+
+Система будет доступна по адресу http://localhost:5173/
 
 ### Вариант 2: Ручной запуск по шагам (не использовать)
 
