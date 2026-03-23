@@ -3,12 +3,11 @@ import { useUser } from '@/contexts/UserContext';
 import { orderApi } from '@/api/order/order';
 import { type OrderShortResponse } from '@/api/order/schema';
 import AdministrationHeader from "@/components/administration/AdministraionHeader";
-import { adminHeaderItems } from '@/config/main';
 import Orders from "@/components/orders/Orders";
 import OrdersFilter from "@/components/orders/OrdersFilter";
 import { BeatLoader } from "react-spinners";
 import { activeStatuses } from '@/components/orders/utils';
-import { adminHeaderItems } from "@/config/admin";
+import { adminHeaderItems } from '@/config/main';
 
 
 function OrdersControlPage() {

@@ -13,6 +13,7 @@ export const adminHeaderItems: NavigationLink[] = [
     { label: "Заказы", link: "/admin/orders" },
     { label: "Аналитика", link: "/admin/analytics" },
     { label: "Персонал", link: "/admin/staff" },
+    { label: "Клиенты", link: "/admin/customers" },
 ];
 
 export const phoneNumber: string = "8 800 555-35-35";

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import AdministrationHeader from "@/components/administration/AdministraionHeader";
-import { adminHeaderItems } from '@/config/main';
 import AddProductCard from "@/components/administration/AddProductCard";
 import AddProductModal from "@/components/administration/AddProductModal";
 import EditProductModal from "@/components/administration/EditProductModal";
@@ -9,7 +8,7 @@ import AdminProductCard from "@/components/administration/AdminProductCard";
 import { menuApi, categoriesApi } from "@/api/menu/menu";
 import { type MenuItem, type Category } from '@/api/menu/schema';
 import { BeatLoader } from "react-spinners";
-import { adminHeaderItems } from "@/config/admin";
+import { adminHeaderItems } from '@/config/main';
 
 
 function MenuControlPage() {
