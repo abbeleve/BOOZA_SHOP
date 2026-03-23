@@ -9,12 +9,18 @@ from pathlib import Path
 import sys
 import os
 
+# Добавляем корень проекта в path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from dotenv import load_dotenv
 
 load_dotenv()
-from backend.models.setting_up_db import Base
+
+# Импорт работает и из контейнера, и локально
+try:
+    from backend.models.setting_up_db import Base
+except ImportError:
+    from models.setting_up_db import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

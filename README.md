@@ -41,7 +41,45 @@
 
 ## 📦 Быстрый запуск
 
-1. Клонируйте репозиторий:
-   ```bash
-   git clone https://github.com/yourusername/rms.git
-   cd rms
+### Вариант 1: Автоматическая инициализация (рекомендуется)
+
+```bash
+# Один шаг - сборка, запуск, миграции, заполнение БД, генерация изображений
+./scripts/init.sh
+```
+
+Или через Make:
+
+```bash
+make init
+```
+
+### Вариант 2: Ручной запуск по шагам (не использовать)
+
+```bash
+# 1. Сборка и запуск
+docker compose build
+docker compose up -d
+
+# 2. Миграции
+docker compose exec backend alembic upgrade head
+
+# 3. Заполнение БД
+docker compose exec backend python scripts/seed_db.py
+
+# 4. Генерация заглушек изображений
+docker compose exec backend python scripts/generate_placeholders.py
+```
+
+### Команды управления (Make)
+
+```bash
+make init       # Полная инициализация
+make up         # Запуск контейнеров
+make down       # Остановка
+make logs       # Просмотр логов
+make migrate    # Применение миграций
+make seed       # Заполнение БД
+make generate   # Генерация изображений
+make clean      # Полная очистка и пересборка
+```
