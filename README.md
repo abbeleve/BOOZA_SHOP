@@ -77,7 +77,6 @@ git clone https://github.com/abbeleve/BOOZA_SHOP.git
 ```bash
 make init
 ```
-
 Система будет доступна по адресу http://localhost:5173/
 
 ### Вариант 2: Ручной запуск по шагам (не использовать)
