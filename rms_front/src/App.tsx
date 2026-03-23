@@ -7,6 +7,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import OrdersControlPage from "./pages/administration/OrdersControlPage";
 import MenuControlPage from "./pages/administration/MenuControlPage";
+import StaffControlPage from "./pages/administration/StaffControlPage";
+import CustomersControlPage from "./pages/administration/CustomersControlPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -33,6 +35,16 @@ function Router() {
                         </ProtectedRoute>
                     }
                 />
+                <Route path="/admin/staff" element={
+                    <ProtectedRoute requiredRole="staff">
+                        <StaffControlPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin/customers" element={
+                    <ProtectedRoute requiredRole="staff">
+                        <CustomersControlPage />
+                    </ProtectedRoute>
+                } />
             </Routes>
         </BrowserRouter>
     );
