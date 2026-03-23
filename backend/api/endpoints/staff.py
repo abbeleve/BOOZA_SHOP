@@ -14,11 +14,12 @@ router = APIRouter(prefix="/staff", tags=["staff"])
 @router.post("/", response_model=StaffResponse, status_code=status.HTTP_201_CREATED)
 def create_staff_member(
     staff_data: StaffCreate,
-    current_user: Users = Depends(get_current_admin),
+    current_user: Users = Depends(get_current_admin),  # Только администратор может создавать сотрудников
     db: Session = Depends(get_db)
 ):
     """
     Назначает существующего пользователя сотрудником.
+    Требует: пользователь уже зарегистрирован в системе.
     - ADMIN может создавать ADMIN и STAFF
     - STAFF может создавать только STAFF
     """
@@ -35,7 +36,7 @@ def create_staff_member(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Пользователь с username '{staff_data.username}' не найден."
+            detail=f"Пользователь с username '{staff_data.username}' не найден. Сначала зарегистрируйте пользователя."
         )
     
     # Проверяем, не является ли пользователь уже сотрудником
@@ -45,8 +46,10 @@ def create_staff_member(
             detail=f"Пользователь '{staff_data.username}' уже является сотрудником"
         )
     
+    # Конвертируем роль из схемы в модель БД
     role_enum = DBRole[staff_data.role.name]
     
+    # Создаём запись сотрудника
     try:
         create_staff(db, username=staff_data.username, role=role_enum)
     except ValueError as e:
@@ -55,6 +58,7 @@ def create_staff_member(
             detail=str(e)
         )
     
+    # Возвращаем полную информацию о сотруднике
     db.commit()
     
     staff_details = get_staff_with_details(db, staff_data.username)
