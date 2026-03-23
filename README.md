@@ -9,7 +9,6 @@
 [![Docker](https://img.shields.io/badge/Docker-24%2B-2496ED?logo=docker)](https://www.docker.com/)
 
 **Система управления рестораном или позной с клиентским интерфейсом заказа и админкой для меню, заказов и персонала**
-
 </div>
 
 ---
@@ -41,7 +40,71 @@
 
 ## 📦 Быстрый запуск
 
-1. Клонируйте репозиторий:
-   ```bash
-   git clone https://github.com/yourusername/rms.git
-   cd rms
+*Если не проделывали установку перейдите в раздел Установка*
+
+Для запуска необходимо корневой папке прописать команду
+
+```bash
+docker compose up
+```
+
+## Для запуска необходимо иметь установленный Docker + WSL2/Linux
+
+https://docs.docker.com/desktop/features/wsl/
+
+
+## Установка
+
+1. Склонировать репозиторий на локальный ПК
+
+```bash
+git clone https://github.com/abbeleve/BOOZA_SHOP.git
+```
+
+2. Скопировать пересланный вам по ТГ файл .env в корень папки проекта
+
+3. Выполнять дальнейшие инструкции по развертыванию
+
+### Вариант 1: Автоматическая инициализация (рекомендуется)
+
+```bash
+# Один шаг - сборка, запуск, миграции, заполнение БД, генерация изображений
+./scripts/init.sh
+```
+
+Или через Make:
+
+```bash
+make init
+```
+Система будет доступна по адресу http://localhost:5173/
+
+### Вариант 2: Ручной запуск по шагам (не использовать)
+
+```bash
+# 1. Сборка и запуск
+docker compose build
+docker compose up -d
+
+# 2. Миграции
+docker compose exec backend alembic upgrade head
+
+# 3. Заполнение БД
+docker compose exec backend python scripts/seed_db.py
+
+# 4. Генерация заглушек изображений
+docker compose exec backend python scripts/generate_placeholders.py
+```
+
+### Команды управления (Make)
+
+```bash
+make init       # Полная инициализация
+make up         # Запуск контейнеров
+make down       # Остановка
+make logs       # Просмотр логов
+make migrate    # Применение миграций
+make seed       # Заполнение БД
+make generate   # Генерация изображений
+make clean      # Полная очистка и пересборка
+```

@@ -43,14 +43,35 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       # Монтируем весь код бэкенда для hot reload
       - ./backend:/app
       - ./backend/static:/app/static
-    # Запуск приложения (seed_db закомментирован - раскомментируйте для заполнения БД при старте)
+      # Монтируем alembic для миграций
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+    # Запуск приложения
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    # command: sh -c "python scripts/seed_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: rms_front/
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_HOST=backend
+      - VITE_API_PORT=8000
+      - VITE_API_PROTOCOL=http
+    depends_on:
+      - backend
+    volumes:
+      - ./rms_front:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
 
 volumes:
   pgdata:

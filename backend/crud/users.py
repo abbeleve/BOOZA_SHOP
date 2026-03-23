@@ -103,7 +103,7 @@ def update_user(db: Session, user_id: int, **kwargs) -> Users | None:
     if not user:
         return None
 
-    allowed_fields = {'name', 'surname', 'patronymic', 'address', 'phone', 'email'}
+    allowed_fields = {'name', 'surname', 'patronymic', 'address', 'phone', 'email', 'hash_password'}
 
     for key, value in kwargs.items():
         if key not in allowed_fields or value is None:

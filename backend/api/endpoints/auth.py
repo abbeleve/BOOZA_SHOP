@@ -155,7 +155,9 @@ async def update_current_user(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Пользователь не найден"
             )
+        db.commit()  # Явно коммитим изменения
     except ValueError as e:
+        db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     db.commit()

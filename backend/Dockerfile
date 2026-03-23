@@ -9,14 +9,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Копируем зависимости из КОРНЯ проекта
+# Копируем зависимости
 COPY requirements.txt ./
 
 RUN pip install --upgrade pip
-# Устанавливаем ВСЁ из uv.lock (включая alembic, ruff — как в pyproject.toml)
 RUN pip install -r requirements.txt
 
-# Копируем ТОЛЬКО код бэкенда
+# Копируем код бэкенда
 COPY . .
 
 RUN useradd -m appuser && chown -R appuser /app
