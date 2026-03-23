@@ -55,5 +55,23 @@ services:
     # Запуск приложения
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
+  frontend:
+    build:
+      context: rms_front/
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_HOST=backend
+      - VITE_API_PORT=8000
+      - VITE_API_PROTOCOL=http
+    depends_on:
+      - backend
+    volumes:
+      - ./rms_front:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
 volumes:
   pgdata:
