@@ -1,0 +1,68 @@
+from sqlalchemy.orm import Session
+from models.setting_up_db import FoodType
+from typing import Optional, List
+
+def create_food_category(db: Session, name: str) -> FoodType:
+    """
+    Создаёт новую категорию еды.
+    category_id определяется автоматически (autoincrement).
+    ВАЖНО: caller должен вызвать db.commit() после создания.
+    """
+    if get_food_category_by_name(db, name):
+        raise ValueError(f"Категория '{name}' уже существует")
+    category = FoodType(name=name)
+    db.add(category)
+    db.flush()  # Получаем category_id, но не коммитим
+    return category
+
+def get_food_category(db: Session, category_id: int) -> Optional[FoodType]:
+    """Получает категорию по ID"""
+    return db.query(FoodType).filter(FoodType.category_id == category_id).first()
+
+def get_food_category_by_name(db: Session, name: str) -> Optional[FoodType]:
+    """Получает категорию по названию"""
+    return db.query(FoodType).filter(FoodType.name == name).first()
+
+def get_food_categories(db: Session) -> List[FoodType]:
+    """Получает все категории"""
+    return db.query(FoodType).all()
+
+def update_food_category(
+    db: Session,
+    category_id: int,
+    name: Optional[str] = None
+) -> Optional[FoodType]:
+    """
+    Обновляет категорию.
+    ВАЖНО: caller должен вызвать db.commit() после обновления.
+    """
+    category = get_food_category(db, category_id)
+    if not category:
+        return None
+
+    if name and name != category.name:
+        if get_food_category_by_name(db, name):
+            raise ValueError(f"Категория '{name}' уже существует")
+        category.name = name
+
+    db.flush()  # Не коммитим
+    return category
+
+def delete_food_category(db: Session, category_id: int) -> bool:
+    """
+    Удаляет категорию (только если нет привязанных элементов меню).
+    ВАЖНО: caller должен вызвать db.commit() после удаления.
+    """
+    category = get_food_category(db, category_id)
+    if not category:
+        return False
+
+    if category.menu_items:  # Проверка связанных элементов
+        raise ValueError(
+            f"Нельзя удалить категорию '{category.name}': "
+            f"есть {len(category.menu_items)} привязанных элементов меню"
+        )
+
+    db.delete(category)
+    db.flush()  # Не коммитим
+    return True
