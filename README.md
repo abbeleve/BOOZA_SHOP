@@ -117,9 +117,9 @@ make clean      # Полная очистка и пересборка
 - **Админ**:
 login: admin | password: admin123
 - **Сотрудник**:
-- login: waiter_anna | password: waiter123
+login: waiter_anna | password: waiter123
 - **Клиент**:
-- login: customer1 | password: user123
+login: customer1 | password: user123
 
 Функционал клиента:
 1. Производить заказы
