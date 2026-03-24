@@ -114,12 +114,12 @@ make clean      # Полная очистка и пересборка
 Система будет доступна по адресу http://localhost:5173/
 
 Креды для входа:
-- Админ:
-- login: admin password: admin123
-- Сотрудник:
-- login: waiter_anna password: waiter123
-- Клиент:
-- login: customer1 password: user123
+- **Админ**:
+login: admin | password: admin123
+- **Сотрудник**:
+- login: waiter_anna | password: waiter123
+- **Клиент**:
+- login: customer1 | password: user123
 
 Функционал клиента:
 1. Производить заказы
