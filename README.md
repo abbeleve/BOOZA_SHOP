@@ -77,15 +77,6 @@ git clone https://github.com/abbeleve/BOOZA_SHOP.git
 ```bash
 make init
 ```
-Система будет доступна по адресу http://localhost:5173/
-
-Креды для входа:
-Админ:
-login: admin password: admin123
-Сотрудник:
-login: waiter_anna password: waiter123
-Клиент:
-login: customer1 password: user123
 
 ### Вариант 2: Ручной запуск по шагам (не использовать)
 
@@ -116,3 +107,18 @@ make seed       # Заполнение БД
 make generate   # Генерация изображений
 make clean      # Полная очистка и пересборка
 ```
+
+---
+
+## 📕 Вход в систему
+Система будет доступна по адресу http://localhost:5173/
+
+Креды для входа:
+- Админ:
+- login: admin password: admin123
+- Сотрудник:
+- login: waiter_anna password: waiter123
+- Клиент:
+- login: customer1 password: user123
+
+Функционал
