@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:16.2-alpine
+    container_name: postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test_password_123
+      POSTGRES_DB: rms_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    command: -c shared_buffers=256MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d rms_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_test_data:
+
+# services:
+#   backend-test:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.backend
+#     environment:
+#       - DATABASE_URL=postgresql://test:test@db-test:5432/rms_test
+#       - TESTING=true
+#     depends_on:
+#       - db-test
+#     command: pytest tests/ -v --cov=app
+  
+#   db-test:
+#     image: postgres:15
+#     environment:
+#       - POSTGRES_DB=rms_test
+#       - POSTGRES_USER=test
+#       - POSTGRES_PASSWORD=test
+#     volumes:
+#       - test_/var/lib/postgresql/data
+  
+#   frontend-test:
+#     build:
+#       context: ./rms_front
+#       dockerfile: Dockerfile.frontend
+#     command: npm run test -- --coverage
+  
+#   frontend-e2e:
+#     build:
+#       context: ./rms_front
+#       dockerfile: Dockerfile.frontend
+#     command: npm run test:e2e
+#     depends_on:
+#       - backend-test
+
+# volumes:
+#   test_
