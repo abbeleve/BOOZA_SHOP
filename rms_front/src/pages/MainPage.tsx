@@ -11,6 +11,7 @@ function MainPage() {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showScrollTop, setShowScrollTop] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,10 +33,23 @@ function MainPage() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 300);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
             <Header items={headerItems} phoneNumber={phoneNumber}/>
-            <main className="grow">
+            <main className="grow relative">
                 <Menu
                     categories={categories}
                     products={menuItems.map(item => ({
@@ -48,6 +62,15 @@ function MainPage() {
                     }))}
                     loading={loading}
                 />
+                {showScrollTop && (
+                    <button
+                        onClick={scrollToTop}
+                        className="fixed bottom-8 right-8 bg-accent hover:bg-accent-hover text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-opacity duration-300"
+                        aria-label="Scroll to top"
+                    >
+                        ↑
+                    </button>
+                )}
             </main>
             <Footer mainLinks={headerItems} additionalLinks={[]} mail={mail} phoneNumber={phoneNumber} />
         </div>
