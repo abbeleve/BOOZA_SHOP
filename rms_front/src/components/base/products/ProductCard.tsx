@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 interface ProductCardProps {
     id: number;
     imageUrl: string;
@@ -19,8 +21,14 @@ function ProductCard({
     loading = false,
     onAddToCart
 }: ProductCardProps) {
-    
-    const handleAddClick = () => {
+    const navigate = useNavigate();
+
+    const handleCardClick = () => {
+        navigate(`/product/${id}`);
+    };
+
+    const handleAddClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (onAddToCart) {
             onAddToCart({
                 id,
@@ -34,7 +42,10 @@ function ProductCard({
 
     return (
         // Контейнер: используем surface-card для фона и surface-border для границ
-        <div className="flex flex-col md:flex-row w-full border border-surface-border bg-surface-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div
+            onClick={handleCardClick}
+            className="flex flex-col md:flex-row w-full border border-surface-border bg-surface-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+        >
             
             {/* Изображение */}
             <div className="md:w-[50%] h-48 md:h-auto relative bg-surface-base">
