@@ -112,9 +112,9 @@ function Menu({ categories, products = [], loading }: MenuProps) {
                 <div
                     key={category}
                     id={`category-${category}`}
-                    className="mb-12 scroll-mt-24 px-2"
+                    className="mb-16 scroll-mt-24 px-2"
                 >
-                    <h2 className="text-3xl font-main font-bold text-text-primary mb-6">
+                    <h2 className="text-5xl font-main font-bold text-text-primary mb-8 pl-5 py-2 border-l-4 border-accent">
                         {category}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">

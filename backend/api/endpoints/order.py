@@ -74,16 +74,28 @@ def create_new_order(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-
-    # Формируем ответ с элементами
-    order_details = get_order_details(db, order.order_id)
-    if not order_details:
+    except Exception as e:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Не удалось получить данные заказа после создания"
+            detail=f"Ошибка при создании заказа: {str(e)}"
         )
 
-    return _map_order_details_to_response(order_details)
+    # Формируем ответ с элементами
+    try:
+        order_details = get_order_details(db, order.order_id)
+        if not order_details:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Не удалось получить данные заказа после создания"
+            )
+
+        return _map_order_details_to_response(order_details)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при формировании ответа: {str(e)}"
+        )
 
 
 @router.get(

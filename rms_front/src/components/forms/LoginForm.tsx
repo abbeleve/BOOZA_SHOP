@@ -1,34 +1,56 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import type { LoginRequest } from '@/api/auths/schema';
-import { 
-    MIN_USERNAME_LENGTH, 
-    MIN_PASSWORD_LENGTH, 
-    ERRORS 
-} from '@/constants/validation';
+import { MAX_PASSWORD_LENGTH } from '@/constants/validation';
 import { ClipLoader } from 'react-spinners';
 
 export default function LoginForm() {
     const [form, setForm] = useState<LoginRequest>({ username: '', password: '' });
     const [errors, setErrors] = useState<Partial<Record<keyof LoginRequest, string>>>({});
     const [showPassword, setShowPassword] = useState(false);
-    
+
+    const fieldRefs = {
+        username: useRef<HTMLInputElement>(null),
+        password: useRef<HTMLInputElement>(null),
+    };
+
     const { login, isLoading, error: contextError, clearError } = useUser();
     const navigate = useNavigate();
 
-    const error = contextError || errors.username;
+    useEffect(() => {
+        clearError();
+        return () => { clearError(); };
+    }, [clearError]);
+
+    const scrollToFirstError = useCallback(() => {
+        const errorFields = Object.keys(errors);
+        if (errorFields.length === 0) return;
+
+        const fieldOrder: (keyof LoginRequest)[] = ['username', 'password'];
+
+        for (const field of fieldOrder) {
+            if (errorFields.includes(field)) {
+                const ref = fieldRefs[field]?.current;
+                if (ref) {
+                    ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    ref.focus();
+                    break;
+                }
+            }
+        }
+    }, [errors]);
 
     const validate = useCallback((): boolean => {
         const newErrors: Partial<Record<keyof LoginRequest, string>> = {};
-        
-        if (!form.username || form.username.trim().length < MIN_USERNAME_LENGTH) {
-            newErrors.username = ERRORS.USERNAME_OR_EMAIL_REQUIRED;
+
+        if (!form.username || form.username.trim().length === 0) {
+            newErrors.username = 'Введите username или email';
         }
-        if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
-            newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
+        if (!form.password || form.password.length === 0) {
+            newErrors.password = 'Введите пароль';
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }, [form]);
@@ -46,9 +68,13 @@ export default function LoginForm() {
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         clearError();
-        
-        if (!validate()) return;
-        
+
+        if (!validate()) {
+            // Scroll to first error field after validation fails
+            setTimeout(() => scrollToFirstError(), 100);
+            return;
+        }
+
         try {
             await login(form.username, form.password);
             navigate('/');
@@ -57,7 +83,7 @@ export default function LoginForm() {
         }
     };
 
-    const inputClass = (field: keyof LoginRequest) => 
+    const inputClass = (field: keyof LoginRequest) =>
         `w-full px-4 py-3 rounded-lg border bg-surface-card text-text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
             errors[field] ? 'border-error focus:ring-error' : 'border-surface-border'
         }`;
@@ -65,10 +91,10 @@ export default function LoginForm() {
     return (
         <div className="w-full max-w-md bg-surface-card rounded-2xl shadow-sm border border-surface-border p-8">
             <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">Вход в аккаунт</h2>
-            
-            {error && (
+
+            {contextError && (
                 <div className="mb-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
-                    {error}
+                    {contextError}
                 </div>
             )}
 
@@ -79,6 +105,7 @@ export default function LoginForm() {
                     </label>
                     <input
                         id="login-username"
+                        ref={fieldRefs.username}
                         type="text"
                         value={form.username}
                         onChange={handleChange('username')}
@@ -93,19 +120,20 @@ export default function LoginForm() {
                     <label htmlFor="login-password" className="block text-text-primary font-medium mb-2">
                         Пароль
                     </label>
-                    
+
                     <div className="relative">
                         <input
                             id="login-password"
+                            ref={fieldRefs.password}
                             type={showPassword ? 'text' : 'password'}
                             value={form.password}
                             onChange={handleChange('password')}
-                            className={`${inputClass('password')} pr-10`} /* ✅ pr-10: отступ справа, чтобы текст не наезжал */
+                            className={`${inputClass('password')} pr-10`}
                             placeholder="••••••••"
-                            minLength={6}
                             autoComplete="current-password"
+                            maxLength={MAX_PASSWORD_LENGTH}
                         />
-                        
+
                         <button
                             type="button"
                             onClick={() => setShowPassword(prev => !prev)}
@@ -125,7 +153,7 @@ export default function LoginForm() {
                             )}
                         </button>
                     </div>
-                    
+
                     {errors.password && <p className="mt-1 text-xs text-error">{errors.password}</p>}
                 </div>
 

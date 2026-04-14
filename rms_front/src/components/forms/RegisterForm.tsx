@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import type { RegisterRequest } from '@/api/auths/schema';
@@ -6,10 +6,17 @@ import { ClipLoader } from 'react-spinners';
 import { usePhoneMask } from '@/hooks/usePhoneMask';
 import { 
     MIN_USERNAME_LENGTH,
+    MAX_USERNAME_LENGTH,
     MIN_NAME_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_PATRONYMIC_LENGTH,
     MIN_SURNAME_LENGTH,
+    MAX_SURNAME_LENGTH,
     MIN_PASSWORD_LENGTH,
+    MAX_PASSWORD_LENGTH,
     MIN_PHONE_DIGITS,
+    MAX_PHONE_DIGITS,
+    MAX_EMAIL_LENGTH,
     EMAIL_REGEX,
     ERRORS
 } from '@/constants/validation';
@@ -26,41 +33,100 @@ export default function RegisterForm() {
         address: '',
     });
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [errors, setErrors] = useState<Partial<Record<keyof RegisterRequest | 'confirmPassword', string>>>({});
+    const [errors, setErrors] = useState<Partial<Record<keyof RegisterRequest, string>> & { confirmPassword?: string }>({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
+    const fieldRefs = {
+        username: useRef<HTMLInputElement>(null),
+        name: useRef<HTMLInputElement>(null),
+        surname: useRef<HTMLInputElement>(null),
+        patronymic: useRef<HTMLInputElement>(null),
+        email: useRef<HTMLInputElement>(null),
+        phone: useRef<HTMLInputElement>(null),
+        password: useRef<HTMLInputElement>(null),
+        confirmPassword: useRef<HTMLInputElement>(null),
+        address: useRef<HTMLInputElement>(null),
+    };
+
     const { register, isLoading, error: contextError, clearError } = useUser();
     const navigate = useNavigate();
     const phoneMask = usePhoneMask(form.phone);
 
-    const error = contextError || errors.username;
+    useEffect(() => {
+        clearError();
+        return () => { clearError(); };
+    }, [clearError]);
+
+    const scrollToFirstError = useCallback(() => {
+        const errorFields = Object.keys(errors);
+        if (errorFields.length === 0) return;
+
+        const fieldOrder: (keyof RegisterRequest | 'confirmPassword')[] = [
+            'username', 'name', 'surname', 'patronymic', 'email', 'phone', 'password', 'confirmPassword', 'address'
+        ];
+
+        for (const field of fieldOrder) {
+            if (errorFields.includes(field)) {
+                const ref = fieldRefs[field as keyof typeof fieldRefs]?.current;
+                if (ref) {
+                    ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    ref.focus();
+                    break;
+                }
+            }
+        }
+    }, [errors]);
 
     const validate = useCallback((): boolean => {
-        const newErrors: Partial<Record<keyof RegisterRequest | 'confirmPassword', string>> = {};
-        
+        const newErrors: Partial<Record<keyof RegisterRequest, string>> & { confirmPassword?: string } = {};
         if (!form.username || form.username.trim().length < MIN_USERNAME_LENGTH) {
             newErrors.username = ERRORS.TOO_SHORT('Username', MIN_USERNAME_LENGTH);
+        } else if (form.username.trim().length > MAX_USERNAME_LENGTH) {
+            newErrors.username = ERRORS.TOO_LONG('Username', MAX_USERNAME_LENGTH);
         }
+
         if (!form.name || form.name.trim().length < MIN_NAME_LENGTH) {
             newErrors.name = ERRORS.TOO_SHORT('Имя', MIN_NAME_LENGTH);
+        } else if (form.name.trim().length > MAX_NAME_LENGTH) {
+            newErrors.name = ERRORS.TOO_LONG('Имя', MAX_NAME_LENGTH);
         }
+
         if (!form.surname || form.surname.trim().length < MIN_SURNAME_LENGTH) {
             newErrors.surname = ERRORS.TOO_SHORT('Фамилия', MIN_SURNAME_LENGTH);
+        } else if (form.surname.trim().length > MAX_SURNAME_LENGTH) {
+            newErrors.surname = ERRORS.TOO_LONG('Фамилия', MAX_SURNAME_LENGTH);
         }
+
+        if (form.patronymic && form.patronymic.trim().length > MAX_PATRONYMIC_LENGTH) {
+            newErrors.patronymic = ERRORS.TOO_LONG('Отчество', MAX_PATRONYMIC_LENGTH);
+        }
+        
         if (!form.email || !EMAIL_REGEX.test(form.email)) {
             newErrors.email = ERRORS.INVALID_EMAIL;
+        } else if (form.email.length > MAX_EMAIL_LENGTH) {
+            newErrors.email = ERRORS.EMAIL_TOO_LONG;
+        } else if (form.email.includes('..') || form.email.startsWith('.') || form.email.endsWith('.')) {
+            newErrors.email = ERRORS.INVALID_EMAIL_FORMAT;
         }
-        if (!form.phone || form.phone.replace(/\D/g, '').length < MIN_PHONE_DIGITS) {
+
+        const phoneDigits = form.phone.replace(/\D/g, '');
+        if (!form.phone || phoneDigits.length < MIN_PHONE_DIGITS) {
+            newErrors.phone = ERRORS.INVALID_PHONE;
+        } else if (phoneDigits.length > MAX_PHONE_DIGITS) {
             newErrors.phone = ERRORS.INVALID_PHONE;
         }
+
         if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
             newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
+        } else if (form.password.length > MAX_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_LONG('Пароль', MAX_PASSWORD_LENGTH);
         }
+
         if (form.password !== confirmPassword) {
             newErrors.confirmPassword = ERRORS.PASSWORDS_MISMATCH;
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }, [form, confirmPassword]);
@@ -78,9 +144,12 @@ export default function RegisterForm() {
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         clearError();
-        
-        if (!validate()) return;
-        
+
+        if (!validate()) {
+            setTimeout(() => scrollToFirstError(), 100);
+            return;
+        }
+
         try {
             await register({
                 ...form,
@@ -100,10 +169,10 @@ export default function RegisterForm() {
     return (
         <div className="w-full max-w-md bg-surface-card rounded-2xl shadow-sm border border-surface-border p-8">
             <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">Регистрация</h2>
-            
-            {error && (
+
+            {contextError && (
                 <div className="mb-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
-                    {error}
+                    {contextError}
                 </div>
             )}
 
@@ -114,13 +183,14 @@ export default function RegisterForm() {
                         Username<span className="text-error">*</span>
                     </label>
                     <input
+                        ref={fieldRefs.username}
                         type="text"
                         value={form.username}
                         onChange={handleChange('username')}
                         className={inputClass('username')}
                         placeholder="login123"
                         autoComplete="username"
-                        minLength={3}
+                        maxLength={MAX_USERNAME_LENGTH}
                     />
                     {errors.username && <p className="mt-1 text-xs text-error">{errors.username}</p>}
                 </div>
@@ -132,12 +202,14 @@ export default function RegisterForm() {
                             Имя<span className="text-error">*</span>
                         </label>
                         <input
+                            ref={fieldRefs.name}
                             type="text"
                             value={form.name}
                             onChange={handleChange('name')}
                             className={inputClass('name')}
                             placeholder="Иван"
                             autoComplete="given-name"
+                            maxLength={MAX_NAME_LENGTH}
                         />
                         {errors.name && <p className="mt-1 text-xs text-error">{errors.name}</p>}
                     </div>
@@ -146,12 +218,14 @@ export default function RegisterForm() {
                             Фамилия<span className="text-error">*</span>
                         </label>
                         <input
+                            ref={fieldRefs.surname}
                             type="text"
                             value={form.surname}
                             onChange={handleChange('surname')}
                             className={inputClass('surname')}
                             placeholder="Иванов"
                             autoComplete="family-name"
+                            maxLength={MAX_SURNAME_LENGTH}
                         />
                         {errors.surname && <p className="mt-1 text-xs text-error">{errors.surname}</p>}
                     </div>
@@ -163,12 +237,14 @@ export default function RegisterForm() {
                         Отчество
                     </label>
                     <input
+                        ref={fieldRefs.patronymic}
                         type="text"
                         value={form.patronymic}
                         onChange={handleChange('patronymic')}
                         className={inputClass('patronymic')}
                         placeholder="Иванович"
                         autoComplete="additional-name"
+                        maxLength={MAX_PATRONYMIC_LENGTH}
                     />
                 </div>
 
@@ -178,12 +254,14 @@ export default function RegisterForm() {
                         Email<span className="text-error">*</span>
                     </label>
                     <input
+                        ref={fieldRefs.email}
                         type="email"
                         value={form.email}
                         onChange={handleChange('email')}
                         className={inputClass('email')}
                         placeholder="you@example.com"
                         autoComplete="email"
+                        maxLength={MAX_EMAIL_LENGTH}
                     />
                     {errors.email && <p className="mt-1 text-xs text-error">{errors.email}</p>}
                 </div>
@@ -194,6 +272,7 @@ export default function RegisterForm() {
                         Телефон<span className="text-error">*</span>
                     </label>
                     <input
+                        ref={fieldRefs.phone}
                         type="tel"
                         value={phoneMask.value}
                         onChange={(e) => {
@@ -213,16 +292,17 @@ export default function RegisterForm() {
                     <label className="block text-text-primary font-medium mb-2">
                         Пароль<span className="text-error">*</span>
                     </label>
-                    
+
                     <div className="relative">
                         <input
+                            ref={fieldRefs.password}
                             type={showPassword ? 'text' : 'password'}
                             value={form.password}
                             onChange={handleChange('password')}
                             className={`${inputClass('password')} pr-10`}
                             placeholder="••••••••"
-                            minLength={6}
                             autoComplete="new-password"
+                            maxLength={MAX_PASSWORD_LENGTH}
                         />
                         <button
                             type="button"
@@ -243,7 +323,7 @@ export default function RegisterForm() {
                             )}
                         </button>
                     </div>
-                    
+
                     {errors.password && <p className="mt-1 text-xs text-error">{errors.password}</p>}
                 </div>
 
@@ -252,9 +332,10 @@ export default function RegisterForm() {
                     <label className="block text-text-primary font-medium mb-2">
                         Подтвердите пароль<span className="text-error">*</span>
                     </label>
-                    
+
                     <div className="relative">
                         <input
+                            ref={fieldRefs.confirmPassword}
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => {
@@ -266,8 +347,8 @@ export default function RegisterForm() {
                             }}
                             className={`${inputClass('confirmPassword')} pr-10`}
                             placeholder="••••••••"
-                            minLength={6}
                             autoComplete="new-password"
+                            maxLength={MAX_PASSWORD_LENGTH}
                         />
                         <button
                             type="button"
@@ -288,7 +369,7 @@ export default function RegisterForm() {
                             )}
                         </button>
                     </div>
-                    
+
                     {errors.confirmPassword && <p className="mt-1 text-xs text-error">{errors.confirmPassword}</p>}
                 </div>
 
@@ -296,6 +377,7 @@ export default function RegisterForm() {
                 <div>
                     <label className="block text-text-primary font-medium mb-2">Адрес</label>
                     <input
+                        ref={fieldRefs.address}
                         type="text"
                         value={form.address}
                         onChange={handleChange('address')}

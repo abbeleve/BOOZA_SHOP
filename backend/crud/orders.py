@@ -168,33 +168,39 @@ def get_order_details(db: Session, order_id: int) -> Optional[Dict]:
     order = get_order_by_id(db, order_id)
     if not order:
         return None
-    
+
     items = []
     for item in order.items:
+        # Safely access menu_item to handle deleted items
+        menu_item = item.menu_item
         items.append({
             "order_food_id": item.order_food_id,
             "menu_item_id": item.menu_item_id,
-            "food_name": item.menu_item.food_name if item.menu_item else "Удалённый элемент",
+            "food_name": menu_item.food_name if menu_item is not None else "Удалённый элемент",
             "quantity": item.quantity,
             "price_per_item": item.price,
             "total": item.quantity * item.price,
-            "image_url": item.menu_item.image_url if item.menu_item else None
+            "image_url": menu_item.image_url if menu_item is not None else None
         })
-    
+
+    # Safely access user to handle edge cases
+    user = order.user
+    user_data = {
+        "user_id": user.user_id if user is not None else 0,
+        "username": user.username if user is not None else "unknown",
+        "name": f"{user.name} {user.surname}" if user is not None else "Неизвестный",
+        "phone": user.phone if user is not None else None
+    }
+
     return {
         "order_id": order.order_id,
-        "status": order.status.name,
-        "create_datetime": order.create_datetime.isoformat(),
+        "status": order.status.name if order.status is not None else "UNKNOWN",
+        "create_datetime": order.create_datetime.isoformat() if order.create_datetime else None,
         "end_datetime": order.end_datetime.isoformat() if order.end_datetime else None,
         "delivery_address": order.delivery_address,
         "phone": order.phone,
         "total_amount": order.total_amount,
         "description": order.description,
-        "user": {
-            "user_id": order.user.user_id,
-            "username": order.user.username,
-            "name": f"{order.user.name} {order.user.surname}",
-            "phone": order.user.phone
-        },
+        "user": user_data,
         "items": items
     }
