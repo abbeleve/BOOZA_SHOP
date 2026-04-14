@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import type { LoginRequest } from '@/api/auths/schema';
-import { MAX_PASSWORD_LENGTH } from '@/constants/validation';
+import { MAX_PASSWORD_LENGTH, MAX_EMAIL_LENGTH } from '@/constants/validation';
 import { ClipLoader } from 'react-spinners';
 
 export default function LoginForm() {
@@ -112,6 +112,7 @@ export default function LoginForm() {
                         className={inputClass('username')}
                         placeholder="username или you@example.com"
                         autoComplete="username"
+                        maxLength={MAX_EMAIL_LENGTH}
                     />
                     {errors.username && <p className="mt-1 text-xs text-error">{errors.username}</p>}
                 </div>
