@@ -22,7 +22,6 @@ function Menu({ categories, products = [], loading }: MenuProps) {
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Фильтрация продуктов по поисковому запросу (название + описание)
     const filteredProducts = useMemo(() => {
         if (!searchQuery.trim()) return products;
         const query = searchQuery.toLowerCase();
@@ -32,35 +31,29 @@ function Menu({ categories, products = [], loading }: MenuProps) {
         );
     }, [products, searchQuery]);
 
-    // Обработчик отправки поиска
     const handleSearch = () => {
         setSearchQuery(searchInput);
     };
 
-    // Обработчик нажатия Enter
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             handleSearch();
         }
     };
 
-    // Функция для извлечения числа из строки цены (например, "1000 ₽" -> 1000)
     const parsePrice = (priceStr: string): number => {
         return parseInt(priceStr.replace(/[^0-9]/g, '')) || 0;
     };
 
-    // Группировка продуктов по категориям
     const productsByCategory = categories.reduce((acc, category) => {
         acc[category] = filteredProducts.filter((product) => product.category === category);
         return acc;
     }, {} as Record<string, typeof filteredProducts>);
 
-    // Фильтруем категории, которые имеют продукты после поиска
     const visibleCategories = searchQuery.trim()
         ? categories.filter((category) => productsByCategory[category].length > 0)
         : categories;
 
-    // Обработчик клика по категории
     const handleCategoryClick = (category: string) => {
         setActiveCategory(category);
         const element = document.getElementById(`category-${category}`);
