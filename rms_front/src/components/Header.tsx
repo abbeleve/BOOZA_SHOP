@@ -22,7 +22,7 @@ function Header({ items, phoneNumber }: HeaderProps) {
     });
 
     return (
-        <header className="flex flex-col md:flex-row md:gap-10 px-4 md:px-10 pt-5 pb-4">
+        <header className="sticky top-0 z-50 flex flex-col md:flex-row md:gap-10 px-4 md:px-10 pt-5 pb-4 bg-surface-base">
             <a href="/" className="flex flex-col justify-center hover:text-accent">
                 <Logo />
             </a>
