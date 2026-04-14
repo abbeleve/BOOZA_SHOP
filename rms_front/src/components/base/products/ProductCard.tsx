@@ -5,8 +5,8 @@ interface ProductCardProps {
     imageUrl: string;
     title: string;
     description: string;
-    price: string; // Для отображения (например "500 ₽")
-    priceValue: number; // Для расчетов (например 500)
+    price: string;
+    priceValue: number;
     loading: boolean;
     onAddToCart?: (product: { id: number; title: string; price: number; displayPrice: string; imageUrl: string }) => void;
 }
@@ -41,7 +41,6 @@ function ProductCard({
     };
 
     return (
-        // Контейнер: используем surface-card для фона и surface-border для границ
         <div
             onClick={handleCardClick}
             className="flex flex-col md:flex-row w-full border border-surface-border bg-surface-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
