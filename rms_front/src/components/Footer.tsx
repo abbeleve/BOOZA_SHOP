@@ -1,9 +1,9 @@
-import type { Link } from "@/types/header";
+import type { NavigationLink } from "@/types/header";
 import Logo from "./Logo";
 
 interface FooterProps {
-    mainLinks: Link[];
-    additionalLinks: Link[];
+    mainLinks: NavigationLink[];
+    additionalLinks: NavigationLink[];
     mail: string,
     phoneNumber: string,
 }
