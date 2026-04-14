@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainPage from "./pages/MainPage";
 import CartPage from "./pages/CartPage";
 import ProfilePage from "./pages/ProfilePage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import OrdersControlPage from "./pages/administration/OrdersControlPage";
@@ -19,6 +20,7 @@ function Router() {
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/cart" element={<CartPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/admin/orders" element={
                     <ProtectedRoute requiredRole="staff">
@@ -38,14 +40,6 @@ function Router() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/access-denied" element={<AccessDeniedPage />} />
-                <Route
-                    path="/admin/menu"
-                    element={
-                        <ProtectedRoute requiredRole="staff">
-                            <MenuControlPage />
-                        </ProtectedRoute>
-                    }
-                />
                 <Route path="/admin/staff" element={
                     <ProtectedRoute requiredRole="staff">
                         <StaffControlPage />
