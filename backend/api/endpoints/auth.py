@@ -43,6 +43,7 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
             phone=user_data.phone,
             patronymic=user_data.patronymic,
         )
+        db.commit()
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     

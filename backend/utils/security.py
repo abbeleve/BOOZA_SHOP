@@ -11,13 +11,13 @@ pwd_context = CryptContext(
 def hash_password(password: str) -> str:
     """
     Хеширует пароль.
-    Защита от DoS: обрезаем до 1024 символов (достаточно для любых паролей).
+    Защита от DoS: обрезаем до 128 символов (достаточно для любых паролей).
     """
     if not password or not isinstance(password, str):
         raise ValueError("Пароль должен быть непустой строкой")
     
     # Защита от атак через очень длинные пароли
-    password = password[:1024]
+    password = password[:128]
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
