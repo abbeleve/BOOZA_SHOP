@@ -6,6 +6,7 @@ import {
     MIN_USERNAME_LENGTH, 
     MIN_PASSWORD_LENGTH, 
     MAX_PASSWORD_LENGTH,
+    PASSWORD_RULES,
     ERRORS 
 } from '@/constants/validation';
 import { ClipLoader } from 'react-spinners';
@@ -28,9 +29,20 @@ export default function LoginForm() {
         }
         if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
             newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
-        }
-        if (form.password && form.password.length > MAX_PASSWORD_LENGTH) {
+        } else if (form.password.length > MAX_PASSWORD_LENGTH) {
             newErrors.password = ERRORS.TOO_LONG('Пароль', MAX_PASSWORD_LENGTH);
+        } else {
+            if (!PASSWORD_RULES.LOWERCASE.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_LOWERCASE;
+            } else if (!PASSWORD_RULES.UPPERCASE.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_UPPERCASE;
+            } else if (!PASSWORD_RULES.DIGIT.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_DIGIT;
+            } else if (!PASSWORD_RULES.SPECIAL.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_SPECIAL;
+            } else if (!PASSWORD_RULES.NO_SPACES.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_NO_SPACES;
+            }
         }
         
         setErrors(newErrors);
@@ -106,7 +118,8 @@ export default function LoginForm() {
                             onChange={handleChange('password')}
                             className={`${inputClass('password')} pr-10`} /* ✅ pr-10: отступ справа, чтобы текст не наезжал */
                             placeholder="••••••••"
-                            minLength={6}
+                            minLength={MIN_PASSWORD_LENGTH}
+                            maxLength={MAX_PASSWORD_LENGTH} 
                             autoComplete="current-password"
                         />
                         

@@ -12,6 +12,7 @@ import {
     MAX_PASSWORD_LENGTH,
     MIN_PHONE_DIGITS,
     EMAIL_REGEX,
+    PASSWORD_RULES,
     ERRORS
 } from '@/constants/validation';
 
@@ -55,15 +56,27 @@ export default function RegisterForm() {
         if (!form.phone || form.phone.replace(/\D/g, '').length < MIN_PHONE_DIGITS) {
             newErrors.phone = ERRORS.INVALID_PHONE;
         }
-        if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
-            newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
-        }
-        if (form.password && form.password.length > MAX_PASSWORD_LENGTH) {
-            newErrors.password = ERRORS.TOO_LONG('Пароль', MAX_PASSWORD_LENGTH);
-        }
         if (form.password !== confirmPassword) {
             newErrors.confirmPassword = ERRORS.PASSWORDS_MISMATCH;
         }
+        if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
+        } else if (form.password.length > MAX_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_LONG('Пароль', MAX_PASSWORD_LENGTH);
+        } else {
+            if (!PASSWORD_RULES.LOWERCASE.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_LOWERCASE;
+            } else if (!PASSWORD_RULES.UPPERCASE.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_UPPERCASE;
+            } else if (!PASSWORD_RULES.DIGIT.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_DIGIT;
+            } else if (!PASSWORD_RULES.SPECIAL.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_SPECIAL;
+            } else if (!PASSWORD_RULES.NO_SPACES.test(form.password)) {
+                newErrors.password = ERRORS.PASSWORD_NO_SPACES;
+            }
+        }
+
         
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -225,7 +238,8 @@ export default function RegisterForm() {
                             onChange={handleChange('password')}
                             className={`${inputClass('password')} pr-10`}
                             placeholder="••••••••"
-                            minLength={6}
+                            minLength={MIN_PASSWORD_LENGTH}
+                            maxLength={MAX_PASSWORD_LENGTH} 
                             autoComplete="new-password"
                         />
                         <button
@@ -270,7 +284,8 @@ export default function RegisterForm() {
                             }}
                             className={`${inputClass('confirmPassword')} pr-10`}
                             placeholder="••••••••"
-                            minLength={6}
+                            minLength={MIN_PASSWORD_LENGTH}
+                            maxLength={MAX_PASSWORD_LENGTH} 
                             autoComplete="new-password"
                         />
                         <button
