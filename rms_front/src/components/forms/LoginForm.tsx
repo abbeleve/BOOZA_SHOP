@@ -5,6 +5,7 @@ import type { LoginRequest } from '@/api/auths/schema';
 import { 
     MIN_USERNAME_LENGTH, 
     MIN_PASSWORD_LENGTH, 
+    MAX_PASSWORD_LENGTH,
     ERRORS 
 } from '@/constants/validation';
 import { ClipLoader } from 'react-spinners';
@@ -27,6 +28,9 @@ export default function LoginForm() {
         }
         if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
             newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
+        }
+        if (form.password && form.password.length > MAX_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_LONG('Пароль', MAX_PASSWORD_LENGTH);
         }
         
         setErrors(newErrors);

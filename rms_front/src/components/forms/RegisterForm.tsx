@@ -9,6 +9,7 @@ import {
     MIN_NAME_LENGTH,
     MIN_SURNAME_LENGTH,
     MIN_PASSWORD_LENGTH,
+    MAX_PASSWORD_LENGTH,
     MIN_PHONE_DIGITS,
     EMAIL_REGEX,
     ERRORS
@@ -56,6 +57,9 @@ export default function RegisterForm() {
         }
         if (!form.password || form.password.length < MIN_PASSWORD_LENGTH) {
             newErrors.password = ERRORS.TOO_SHORT('Пароль', MIN_PASSWORD_LENGTH);
+        }
+        if (form.password && form.password.length > MAX_PASSWORD_LENGTH) {
+            newErrors.password = ERRORS.TOO_LONG('Пароль', MAX_PASSWORD_LENGTH);
         }
         if (form.password !== confirmPassword) {
             newErrors.confirmPassword = ERRORS.PASSWORDS_MISMATCH;
