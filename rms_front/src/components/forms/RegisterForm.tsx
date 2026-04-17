@@ -170,12 +170,6 @@ export default function RegisterForm() {
         <div className="w-full max-w-md bg-surface-card rounded-2xl shadow-sm border border-surface-border p-8">
             <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">Регистрация</h2>
 
-            {contextError && (
-                <div className="mb-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
-                    {contextError}
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Username */}
                 <div>
